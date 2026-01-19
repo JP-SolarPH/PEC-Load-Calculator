@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> PEC Load Schedule Calculator</title>
+    <title>PEC Load Schedule & BOM Calculator</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f0f2f5; }
         .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
@@ -12,31 +12,26 @@
         .field { display: flex; flex-direction: column; gap: 5px; }
         label { font-size: 11px; font-weight: bold; color: #495057; text-transform: uppercase; }
         input, select, button { padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; }
-        input:focus, select:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
         .btn-add { background-color: #28a745; color: white; cursor: pointer; border: none; font-weight: 600; height: 42px; padding: 0 20px; }
         .btn-print { background-color: #007bff; color: white; cursor: pointer; border: none; font-weight: 600; padding: 10px 20px; border-radius: 6px; }
         .btn-delete { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
         th, td { border: 1px solid #dee2e6; padding: 12px 8px; text-align: center; }
-        th { background-color: #343a40; color: white; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
-        .summary-box { margin-top: 30px; padding: 20px; background: #e9ecef; border-radius: 8px; display: flex; flex-direction: column; gap: 10px; }
-        .phase-col { background-color: #fdfdfd; font-weight: bold; width: 80px; }
-        
+        th { background-color: #343a40; color: white; text-transform: uppercase; font-size: 10px; }
+        .summary-box { margin-top: 30px; padding: 20px; background: #e9ecef; border-radius: 8px; }
+        .bom-section { margin-top: 30px; border-top: 2px dashed #ccc; padding-top: 20px; }
+        .bom-title { font-weight: bold; color: #2c3e50; margin-bottom: 10px; font-size: 1.2em; }
         @media print {
             .input-group, .btn-delete, .btn-print, .btn-delete-col { display: none !important; }
-            body { background: white; margin: 0; }
             .container { box-shadow: none; max-width: 100%; padding: 0; }
-            table { font-size: 11px; width: 100%; }
-            th { background-color: #eee !important; color: black; border: 1px solid #000; }
-            td { border: 1px solid #000; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>3-Phase PEC Load Schedule Calculator</h2>
-    <p style="margin-top: -10px; color: #6c757d; font-size: 0.9em;">System: 230V/400V 3-Phase, 4-Wire - Philippine Electrical Code Part 1</p>
+    <h2>PEC Load Schedule & BOM</h2>
+    <p style="margin-top: -10px; color: #6c757d; font-size: 0.9em;">System: 230V/400V - Philippine Electrical Code Part 1</p>
     
     <div class="input-group">
         <div class="field" style="flex: 1;">
@@ -47,67 +42,46 @@
                 <option value="outlet" data-va="180">Convenience Outlet</option>
                 <option value="acu1" data-va="1500">ACU 1.0 HP</option>
                 <option value="acu3" data-va="4500">3-Phase Motor/ACU</option>
-                <option value="range" data-va="8000">3-Phase Range</option>
             </select>
         </div>
-        <div class="field" style="flex: 1.5;">
-            <label>Description</label>
-            <input type="text" id="desc" placeholder="Load Name">
-        </div>
-        <div class="field" style="width: 100px;">
-            <label>Load Type</label>
-            <select id="loadType">
-                <option value="1">1-Phase</option>
-                <option value="3">3-Phase</option>
-            </select>
-        </div>
-        <div class="field" style="width: 100px;">
-            <label>Phase (1-Ph Only)</label>
-            <select id="phaseSel">
-                <option value="A">Phase A</option>
-                <option value="B">Phase B</option>
-                <option value="C">Phase C</option>
-            </select>
-        </div>
-        <div class="field" style="width: 100px;">
-            <label>VA per Unit</label>
-            <input type="number" id="va" placeholder="180">
-        </div>
-        <div class="field" style="width: 60px;">
-            <label>Qty</label>
-            <input type="number" id="qty" value="1">
-        </div>
+        <div class="field" style="flex: 1.5;"><label>Description</label><input type="text" id="desc"></div>
+        <div class="field"><label>Type</label><select id="loadType"><option value="1">1-Phase</option><option value="3">3-Phase</option></select></div>
+        <div class="field"><label>Phase</label><select id="phaseSel"><option value="A">Phase A</option><option value="B">Phase B</option><option value="C">Phase C</option></select></div>
+        <div class="field"><label>VA</label><input type="number" id="va"></div>
+        <div class="field"><label>Qty</label><input type="number" id="qty" value="1"></div>
         <button class="btn-add" onclick="addCircuit()">ADD LOAD</button>
     </div>
 
     
 
+[Image of a three-phase electrical panel diagram]
+
+
     <table id="loadTable">
         <thead>
             <tr>
-                <th>Ckt</th>
-                <th>Load Description</th>
-                <th>Qty</th>
-                <th>VA (A)</th>
-                <th>VA (B)</th>
-                <th>VA (C)</th>
-                <th>Amps</th>
-                <th>CB (AT)</th>
-                <th>Wire (mm²)</th>
-                <th class="btn-delete-col">Action</th>
+                <th>Ckt</th><th>Description</th><th>Qty</th><th>VA (A)</th><th>VA (B)</th><th>VA (C)</th><th>Amps</th><th>CB (AT)</th><th>Wire</th><th class="btn-delete-col">Action</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
 
     <div class="summary-box">
-        <div id="phaseTotals" style="font-size: 1em; color: #444;">
-            Total Phase A: 0 VA | Total Phase B: 0 VA | Total Phase C: 0 VA
+        <div id="phaseTotals">Total Phase A: 0 VA | Total Phase B: 0 VA | Total Phase C: 0 VA</div>
+        <div id="totalSummary" style="font-size: 1.2em; font-weight: bold; color: #1a3a5a; margin-top:10px;">
+            Total Computed Load: 0 VA | Main Breaker: 0 AT
         </div>
-        <div id="totalSummary" style="font-size: 1.2em; font-weight: bold; color: #1a3a5a;">
-            Total Computed Load: 0 VA | Main 3P Breaker: 0 AT
-        </div>
-        <div style="margin-top: 10px;">
+    </div>
+
+    <div class="bom-section">
+        <div class="bom-title">Automatic Bill of Materials (BOM)</div>
+        <table id="bomTable">
+            <thead>
+                <tr><th>Item Description</th><th>Quantity / Specs</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div style="margin-top: 20px;">
             <button class="btn-print" onclick="window.print()">PRINT / DOWNLOAD PDF</button>
         </div>
     </div>
@@ -118,95 +92,81 @@
 
     function applyTemplate() {
         const select = document.getElementById('template');
-        const selectedOption = select.options[select.selectedIndex];
-        if (selectedOption.value !== "") {
-            document.getElementById('desc').value = selectedOption.text;
-            document.getElementById('va').value = selectedOption.getAttribute('data-va');
-            // Auto-select 3-Phase if keyword exists
-            if (selectedOption.text.includes("3-Phase")) {
-                document.getElementById('loadType').value = "3";
-            } else {
-                document.getElementById('loadType').value = "1";
-            }
+        const opt = select.options[select.selectedIndex];
+        if (opt.value) {
+            document.getElementById('desc').value = opt.text;
+            document.getElementById('va').value = opt.getAttribute('data-va');
+            document.getElementById('loadType').value = opt.text.includes("3-Phase") ? "3" : "1";
         }
     }
 
     function addCircuit() {
-        const desc = document.getElementById('desc').value;
-        const va = parseFloat(document.getElementById('va').value);
-        const qty = parseInt(document.getElementById('qty').value);
-        const type = document.getElementById('loadType').value;
-        const phase = document.getElementById('phaseSel').value;
-
-        if (!desc || isNaN(va) || isNaN(qty)) return alert("Fill all fields");
+        const desc = document.getElementById('desc').value, va = parseFloat(document.getElementById('va').value), qty = parseInt(document.getElementById('qty').value), type = document.getElementById('loadType').value, phase = document.getElementById('phaseSel').value;
+        if (!desc || isNaN(va)) return alert("Fill fields");
 
         const totalVA = va * qty;
-        let vaA = 0, vaB = 0, vaC = 0, amps = 0;
+        let vaA = 0, vaB = 0, vaC = 0, amps = (type === "1") ? (totalVA / 230) : (totalVA / (400 * 1.73205));
+        
+        if (type === "1") { 
+            if (phase === "A") vaA = totalVA; else if (phase === "B") vaB = totalVA; else vaC = totalVA;
+        } else { vaA = vaB = vaC = totalVA / 3; }
 
-        if (type === "1") {
-            if (phase === "A") vaA = totalVA;
-            else if (phase === "B") vaB = totalVA;
-            else vaC = totalVA;
-            amps = totalVA / 230;
-        } else {
-            vaA = totalVA / 3;
-            vaB = totalVA / 3;
-            vaC = totalVA / 3;
-            amps = totalVA / (400 * 1.73205); // 3-Phase Current Formula
-        }
+        let cbAt = [15, 20, 30, 40, 50, 60, 70, 100, 125, 150, 200].find(b => b >= amps * 1.25) || 200;
+        let wire = cbAt <= 15 ? "2.0 mm²" : cbAt <= 20 ? "3.5 mm²" : cbAt <= 30 ? "5.5 mm²" : cbAt <= 40 ? "8.0 mm²" : cbAt <= 55 ? "14.0 mm²" : "22.0 mm²";
 
-        let loadWithSafety = amps * 1.25;
-        const standardBreakers = [15, 20, 30, 40, 50, 60, 70, 100, 125, 150, 175, 200];
-        let cbAt = standardBreakers.find(b => b >= loadWithSafety) || 200;
-
-        let wire = "2.0 mm²";
-        if (cbAt > 15) wire = "3.5 mm²";
-        if (cbAt > 20) wire = "5.5 mm²";
-        if (cbAt > 30) wire = "8.0 mm²";
-        if (cbAt > 40) wire = "14.0 mm²";
-        if (cbAt > 55) wire = "22.0 mm²";
-
-        circuits.push({ desc, qty, vaA, vaB, vaC, totalVA, amps, cbAt, wire, type });
+        circuits.push({ desc, qty, vaA, vaB, vaC, totalVA, amps, cbAt, wire, type, phase });
         updateTable();
     }
 
-    function removeCircuit(index) {
-        circuits.splice(index, 1);
-        updateTable();
-    }
+    function removeCircuit(index) { circuits.splice(index, 1); updateTable(); }
 
     function updateTable() {
         const tbody = document.querySelector('#loadTable tbody');
         tbody.innerHTML = '';
-        let sumA = 0, sumB = 0, sumC = 0;
+        let sumA = 0, sumB = 0, sumC = 0, hasThreePhase = false, phasesUsed = new Set();
 
-        circuits.forEach((c, index) => {
+        circuits.forEach((c, i) => {
             sumA += c.vaA; sumB += c.vaB; sumC += c.vaC;
-            tbody.innerHTML += `<tr>
-                <td>${index + 1}</td>
-                <td style="text-align: left;">${c.desc} ${c.type == '3' ? '(3Ø)' : '('+c.phase+')'}</td>
-                <td>${c.qty}</td>
-                <td class="phase-col">${c.vaA > 0 ? c.vaA.toLocaleString() : '-'}</td>
-                <td class="phase-col">${c.vaB > 0 ? c.vaB.toLocaleString() : '-'}</td>
-                <td class="phase-col">${c.vaC > 0 ? c.vaC.toLocaleString() : '-'}</td>
-                <td>${c.amps.toFixed(2)}</td>
-                <td>${c.cbAt} AT</td>
-                <td>${c.wire}</td>
-                <td class="btn-delete-col"><button class="btn-delete" onclick="removeCircuit(${index})">✕</button></td>
-            </tr>`;
+            if (c.type === "3") hasThreePhase = true;
+            if (c.vaA > 0) phasesUsed.add("A"); if (c.vaB > 0) phasesUsed.add("B"); if (c.vaC > 0) phasesUsed.add("C");
+
+            tbody.innerHTML += `<tr><td>${i+1}</td><td style="text-align:left">${c.desc}</td><td>${c.qty}</td><td>${c.vaA || '-'}</td><td>${c.vaB || '-'}</td><td>${c.vaC || '-'}</td><td>${c.amps.toFixed(2)}</td><td>${c.cbAt} AT</td><td>${c.wire}</td><td class="btn-delete-col"><button class="btn-delete" onclick="removeCircuit(${i})">✕</button></td></tr>`;
         });
 
         const totalVA = sumA + sumB + sumC;
-        // 3-Phase Main Breaker sizing based on highest phase to ensure balance
+        const isActuallyThreePhase = hasThreePhase || phasesUsed.size > 1;
         const maxPhase = Math.max(sumA, sumB, sumC);
-        const mainAmps = (maxPhase * 3) / (400 * 1.73205);
-        const mainCB = circuits.length > 0 ? ([30, 40, 50, 60, 70, 100, 125, 150, 175, 200, 225, 250].find(b => b >= mainAmps * 1.25) || 0) : 0;
+        const mainAmps = isActuallyThreePhase ? (maxPhase * 3 / (400 * 1.73205)) : (totalVA / 230);
+        const mainCB = circuits.length ? ([30, 40, 60, 100, 125, 150, 200, 250].find(b => b >= mainAmps * 1.25) || 0) : 0;
+        const poleType = isActuallyThreePhase ? "3-Pole" : "2-Pole";
 
-        document.getElementById('phaseTotals').innerHTML = 
-            `Total Phase A: <strong>${sumA.toLocaleString()} VA</strong> | Total Phase B: <strong>${sumB.toLocaleString()} VA</strong> | Total Phase C: <strong>${sumC.toLocaleString()} VA</strong>`;
+        document.getElementById('phaseTotals').innerHTML = `A: ${sumA} | B: ${sumB} | C: ${sumC}`;
+        document.getElementById('totalSummary').innerHTML = `Total Load: ${totalVA.toLocaleString()} VA | Main Breaker: ${mainCB} AT (${poleType})`;
+
+        updateBOM(mainCB, poleType);
+    }
+
+    function updateBOM(mainCB, poleType) {
+        const bomBody = document.querySelector('#bomTable tbody');
+        bomBody.innerHTML = '';
+        if (!circuits.length) return;
+
+        // Main Breaker
+        bomBody.innerHTML += `<tr><td>Main Circuit Breaker (${poleType}, Bolt-on)</td><td>1 unit - ${mainCB} AT</td></tr>`;
         
-        document.getElementById('totalSummary').innerHTML = 
-            `Total Computed Load: ${totalVA.toLocaleString()} VA | Main 3-Phase Breaker: ${mainCB} AT`;
+        // Branch Breakers
+        let cbCounts = {};
+        circuits.forEach(c => cbCounts[c.cbAt] = (cbCounts[c.cbAt] || 0) + 1);
+        for (let at in cbCounts) {
+            bomBody.innerHTML += `<tr><td>Branch Circuit Breaker (Plug-in/Bolt-on)</td><td>${cbCounts[at]} units - ${at} AT</td></tr>`;
+        }
+
+        // Wire Summary
+        let wireSpecs = {};
+        circuits.forEach(c => wireSpecs[c.wire] = true);
+        bomBody.innerHTML += `<tr><td>THHN/THWN Copper Wire (Stranded)</td><td>Specs used: ${Object.keys(wireSpecs).join(", ")}</td></tr>`;
+        
+        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 (Indoor) or NEMA 3R (Outdoor)</td></tr>`;
     }
 </script>
 </body>
