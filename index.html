@@ -5,25 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PEC Load Schedule & BOM Calculator</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f0f2f5; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h2 { color: #1a3a5a; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 0; }
-        .input-group { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; align-items: flex-end; }
-        .field { display: flex; flex-direction: column; gap: 5px; }
+        :root { --primary: #1a3a5a; --accent: #3498db; --success: #28a745; --danger: #dc3545; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: #f0f2f5; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        
+        /* Project Info Section */
+        .project-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-left: 5px solid var(--accent); border-radius: 4px; }
+        .project-info div { display: flex; flex-direction: column; }
+        .project-info label { font-size: 10px; font-weight: bold; color: #777; }
+        .project-info input { border: none; background: transparent; border-bottom: 1px solid #ddd; padding: 5px 0; font-weight: 600; color: var(--primary); }
+
+        h2 { color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 10px; margin-top: 0; font-size: 1.5rem; }
+        p.subtitle { margin-top: -10px; color: #6c757d; font-size: 0.85em; }
+
+        /* Responsive Input Group */
+        .input-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; align-items: flex-end; }
+        .field { display: flex; flex-direction: column; gap: 5px; flex: 1 1 150px; } /* Flex grow/shrink with basis */
+        
         label { font-size: 11px; font-weight: bold; color: #495057; text-transform: uppercase; }
-        input, select, button { padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; }
-        .btn-add { background-color: #28a745; color: white; cursor: pointer; border: none; font-weight: 600; height: 42px; padding: 0 20px; }
-        .btn-print { background-color: #007bff; color: white; cursor: pointer; border: none; font-weight: 600; padding: 10px 20px; border-radius: 6px; }
-        .btn-delete { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { border: 1px solid #dee2e6; padding: 12px 8px; text-align: center; }
+        input, select, button { padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; width: 100%; box-sizing: border-box; }
+        
+        .btn-add { background-color: var(--success); color: white; cursor: pointer; border: none; font-weight: 600; height: 42px; }
+        .btn-print { background-color: var(--accent); color: white; cursor: pointer; border: none; font-weight: 600; padding: 12px 20px; border-radius: 6px; width: auto; margin-top: 15px; }
+        .btn-delete { background-color: var(--danger); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; line-height: 1; }
+
+        /* Table Responsiveness */
+        .table-wrapper { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; background: white; min-width: 800px; }
+        th, td { border: 1px solid #dee2e6; padding: 10px 5px; text-align: center; }
         th { background-color: #343a40; color: white; text-transform: uppercase; font-size: 10px; }
-        .summary-box { margin-top: 30px; padding: 20px; background: #e9ecef; border-radius: 8px; }
+        
+        .summary-box { margin-top: 25px; padding: 20px; background: #e9ecef; border-radius: 8px; }
         .bom-section { margin-top: 30px; border-top: 2px dashed #ccc; padding-top: 20px; }
-        .bom-title { font-weight: bold; color: #2c3e50; margin-bottom: 10px; font-size: 1.2em; }
+        .bom-title { font-weight: bold; color: var(--primary); margin-bottom: 10px; font-size: 1.1em; }
+
+        /* Mobile Specific Adjustments */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .input-group { padding: 15px; gap: 15px; }
+            .field { flex: 1 1 100%; } /* Stacks inputs vertically on mobile */
+            h2 { font-size: 1.2rem; }
+        }
+
         @media print {
+            .input-group, .btn-delete, .btn-print, .btn-delete-col, .project-info input { border: none !important; }
             .input-group, .btn-delete, .btn-print, .btn-delete-col { display: none !important; }
-            .container { box-shadow: none; max-width: 100%; padding: 0; }
+            body { padding: 0; background: white; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; padding: 0; }
+            table { font-size: 10px; border: 1px solid black; }
+            th, td { border: 1px solid black; }
         }
     </style>
 </head>
@@ -31,16 +61,23 @@
 
 <div class="container">
     <h2>PEC Load Schedule & BOM</h2>
-    <p style="margin-top: -10px; color: #6c757d; font-size: 0.9em;">System: 230V/400V - Philippine Electrical Code Part 1</p>
+    <p class="subtitle">System: 230V/400V - Philippine Electrical Code Part 1</p>
+
+    <div class="project-info">
+        <div><label>Project Name:</label><input type="text" placeholder="e.g. Residential Building"></div>
+        <div><label>Location:</label><input type="text" placeholder="e.g. Quezon City, PH"></div>
+        <div><label>Owner/Client:</label><input type="text" placeholder="Name"></div>
+        <div><label>Date:</label><input type="date" id="currentDate"></div>
+    </div>
     
     <div class="input-group">
-        <div class="field" style="flex: 1.2;">
+        <div class="field">
             <label>Template</label>
             <select id="template" onchange="applyTemplate()">
                 <option value="">-- Custom --</option>
                 <option value="lighting" data-va="100">Lighting Outlet</option>
                 <option value="outlet" data-va="180">Convenience Outlet</option>
-                <option value="ref" data-va="600">Refrigerator (Special Outlet)</option>
+                <option value="ref" data-va="600">Refrigerator (Special)</option>
                 <option value="range" data-va="8000">Electric Range (Special)</option>
                 <option value="acu1" data-va="1500">ACU 1.0 HP</option>
                 <option value="acu15" data-va="1900">ACU 1.5 HP</option>
@@ -48,50 +85,53 @@
                 <option value="acu25" data-va="3200">ACU 2.5 HP</option>
                 <option value="acu3" data-va="4000">ACU 3.0 HP</option>
                 <option value="acu3_3ph" data-va="4000">ACU 3.0 HP (3-Phase)</option>
-                <option value="spare" data-va="1500">Spare Circuit (Provision)</option>
+                <option value="spare" data-va="1500">Spare Circuit</option>
             </select>
         </div>
-        <div class="field" style="flex: 1.5;"><label>Description</label><input type="text" id="desc"></div>
+        <div class="field" style="flex-grow: 2;"><label>Description</label><input type="text" id="desc"></div>
         <div class="field"><label>Type</label><select id="loadType"><option value="1">1-Phase</option><option value="3">3-Phase</option></select></div>
         <div class="field"><label>Phase</label><select id="phaseSel"><option value="A">Phase A</option><option value="B">Phase B</option><option value="C">Phase C</option></select></div>
         <div class="field"><label>VA</label><input type="number" id="va"></div>
         <div class="field"><label>Qty</label><input type="number" id="qty" value="1"></div>
-        <button class="btn-add" onclick="addCircuit()">ADD LOAD</button>
+        <div class="field"><button class="btn-add" onclick="addCircuit()">ADD LOAD</button></div>
     </div>
 
-    
-
-    <table id="loadTable">
-        <thead>
-            <tr>
-                <th>Ckt</th><th>Description</th><th>Qty</th><th>VA (A)</th><th>VA (B)</th><th>VA (C)</th><th>Amps</th><th>CB (AT)</th><th>Wire</th><th class="btn-delete-col">Action</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="table-wrapper">
+        <table id="loadTable">
+            <thead>
+                <tr>
+                    <th>Ckt</th><th>Description</th><th>Qty</th><th>VA (A)</th><th>VA (B)</th><th>VA (C)</th><th>Amps</th><th>CB (AT)</th><th>Wire</th><th class="btn-delete-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
     <div class="summary-box">
-        <div id="phaseTotals">Total Phase A: 0 VA | Total Phase B: 0 VA | Total Phase C: 0 VA</div>
-        <div id="totalSummary" style="font-size: 1.2em; font-weight: bold; color: #1a3a5a; margin-top:10px;">
+        <div id="phaseTotals" style="font-size: 0.9em; color: #555;">Total Phase A: 0 VA | Total Phase B: 0 VA | Total Phase C: 0 VA</div>
+        <div id="totalSummary" style="font-size: 1.2em; font-weight: bold; color: var(--primary); margin-top:10px;">
             Total Computed Load: 0 VA | Main Breaker: 0 AT
         </div>
     </div>
 
     <div class="bom-section">
         <div class="bom-title">Automatic Bill of Materials (BOM)</div>
-        <table id="bomTable">
-            <thead>
-                <tr><th>Item Description</th><th>Quantity / Specs</th></tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <div style="margin-top: 20px;">
-            <button class="btn-print" onclick="window.print()">PRINT / DOWNLOAD PDF</button>
+        <div class="table-wrapper">
+            <table id="bomTable">
+                <thead>
+                    <tr><th>Item Description</th><th>Quantity / Specs</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
+        <button class="btn-print" onclick="window.print()">PRINT / DOWNLOAD PDF</button>
     </div>
 </div>
 
 <script>
+    // Set default date to today
+    document.getElementById('currentDate').valueAsDate = new Date();
+
     let circuits = [];
 
     function applyTemplate() {
@@ -105,7 +145,12 @@
     }
 
     function addCircuit() {
-        const desc = document.getElementById('desc').value, va = parseFloat(document.getElementById('va').value), qty = parseInt(document.getElementById('qty').value), type = document.getElementById('loadType').value, phase = document.getElementById('phaseSel').value;
+        const desc = document.getElementById('desc').value, 
+              va = parseFloat(document.getElementById('va').value), 
+              qty = parseInt(document.getElementById('qty').value), 
+              type = document.getElementById('loadType').value, 
+              phase = document.getElementById('phaseSel').value;
+        
         if (!desc || isNaN(va)) return alert("Fill fields");
 
         const totalVA = va * qty;
@@ -120,6 +165,8 @@
 
         circuits.push({ desc, qty, vaA, vaB, vaC, totalVA, amps, cbAt, wire, type, phase });
         updateTable();
+        // Clear description for next entry
+        document.getElementById('desc').value = '';
     }
 
     function removeCircuit(index) { circuits.splice(index, 1); updateTable(); }
@@ -167,9 +214,8 @@
         circuits.forEach(c => wireSpecs[c.wire] = true);
         bomBody.innerHTML += `<tr><td>THHN/THWN Copper Wire (Stranded)</td><td>Required Specs: ${Object.keys(wireSpecs).join(", ")}</td></tr>`;
         
-        // Panel size logic: Circuits + 2 for spacing/spares
         let totalSlots = circuits.length + 2;
-        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 Type (at least ${totalSlots} Branches)</td></tr>`;
+        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 Type (Min. ${totalSlots} Branches)</td></tr>`;
     }
 </script>
 </body>
