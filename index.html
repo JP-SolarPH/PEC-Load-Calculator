@@ -34,14 +34,20 @@
     <p style="margin-top: -10px; color: #6c757d; font-size: 0.9em;">System: 230V/400V - Philippine Electrical Code Part 1</p>
     
     <div class="input-group">
-        <div class="field" style="flex: 1;">
+        <div class="field" style="flex: 1.2;">
             <label>Template</label>
             <select id="template" onchange="applyTemplate()">
                 <option value="">-- Custom --</option>
                 <option value="lighting" data-va="100">Lighting Outlet</option>
                 <option value="outlet" data-va="180">Convenience Outlet</option>
+                <option value="ref" data-va="600">Refrigerator (Special Outlet)</option>
+                <option value="range" data-va="8000">Electric Range (Special)</option>
                 <option value="acu1" data-va="1500">ACU 1.0 HP</option>
-                <option value="acu3" data-va="4500">3-Phase Motor/ACU</option>
+                <option value="acu15" data-va="1900">ACU 1.5 HP</option>
+                <option value="acu2" data-va="2500">ACU 2.0 HP</option>
+                <option value="acu25" data-va="3200">ACU 2.5 HP</option>
+                <option value="acu3" data-va="4000">ACU 3.0 HP</option>
+                <option value="acu3_3ph" data-va="4000">ACU 3.0 HP (3-Phase)</option>
             </select>
         </div>
         <div class="field" style="flex: 1.5;"><label>Description</label><input type="text" id="desc"></div>
@@ -53,9 +59,6 @@
     </div>
 
     
-
-[Image of a three-phase electrical panel diagram]
-
 
     <table id="loadTable">
         <thead>
@@ -96,7 +99,7 @@
         if (opt.value) {
             document.getElementById('desc').value = opt.text;
             document.getElementById('va').value = opt.getAttribute('data-va');
-            document.getElementById('loadType').value = opt.text.includes("3-Phase") ? "3" : "1";
+            document.getElementById('loadType').value = opt.text.includes("(3-Phase)") ? "3" : "1";
         }
     }
 
@@ -111,8 +114,8 @@
             if (phase === "A") vaA = totalVA; else if (phase === "B") vaB = totalVA; else vaC = totalVA;
         } else { vaA = vaB = vaC = totalVA / 3; }
 
-        let cbAt = [15, 20, 30, 40, 50, 60, 70, 100, 125, 150, 200].find(b => b >= amps * 1.25) || 200;
-        let wire = cbAt <= 15 ? "2.0 mm²" : cbAt <= 20 ? "3.5 mm²" : cbAt <= 30 ? "5.5 mm²" : cbAt <= 40 ? "8.0 mm²" : cbAt <= 55 ? "14.0 mm²" : "22.0 mm²";
+        let cbAt = [15, 20, 30, 40, 50, 60, 70, 100, 125, 150, 200, 250].find(b => b >= amps * 1.25) || 250;
+        let wire = cbAt <= 15 ? "2.0 mm²" : cbAt <= 20 ? "3.5 mm²" : cbAt <= 30 ? "5.5 mm²" : cbAt <= 40 ? "8.0 mm²" : cbAt <= 55 ? "14.0 mm²" : cbAt <= 80 ? "22.0 mm²" : "30.0 mm²";
 
         circuits.push({ desc, qty, vaA, vaB, vaC, totalVA, amps, cbAt, wire, type, phase });
         updateTable();
@@ -130,18 +133,18 @@
             if (c.type === "3") hasThreePhase = true;
             if (c.vaA > 0) phasesUsed.add("A"); if (c.vaB > 0) phasesUsed.add("B"); if (c.vaC > 0) phasesUsed.add("C");
 
-            tbody.innerHTML += `<tr><td>${i+1}</td><td style="text-align:left">${c.desc}</td><td>${c.qty}</td><td>${c.vaA || '-'}</td><td>${c.vaB || '-'}</td><td>${c.vaC || '-'}</td><td>${c.amps.toFixed(2)}</td><td>${c.cbAt} AT</td><td>${c.wire}</td><td class="btn-delete-col"><button class="btn-delete" onclick="removeCircuit(${i})">✕</button></td></tr>`;
+            tbody.innerHTML += `<tr><td>${i+1}</td><td style="text-align:left">${c.desc}</td><td>${c.qty}</td><td>${c.vaA.toFixed(0) || '-'}</td><td>${c.vaB.toFixed(0) || '-'}</td><td>${c.vaC.toFixed(0) || '-'}</td><td>${c.amps.toFixed(2)}</td><td>${c.cbAt} AT</td><td>${c.wire}</td><td class="btn-delete-col"><button class="btn-delete" onclick="removeCircuit(${i})">✕</button></td></tr>`;
         });
 
         const totalVA = sumA + sumB + sumC;
         const isActuallyThreePhase = hasThreePhase || phasesUsed.size > 1;
         const maxPhase = Math.max(sumA, sumB, sumC);
         const mainAmps = isActuallyThreePhase ? (maxPhase * 3 / (400 * 1.73205)) : (totalVA / 230);
-        const mainCB = circuits.length ? ([30, 40, 60, 100, 125, 150, 200, 250].find(b => b >= mainAmps * 1.25) || 0) : 0;
+        const mainCB = circuits.length ? ([30, 40, 50, 60, 70, 100, 125, 150, 200, 250, 300, 400].find(b => b >= mainAmps * 1.25) || 0) : 0;
         const poleType = isActuallyThreePhase ? "3-Pole" : "2-Pole";
 
-        document.getElementById('phaseTotals').innerHTML = `A: ${sumA} | B: ${sumB} | C: ${sumC}`;
-        document.getElementById('totalSummary').innerHTML = `Total Load: ${totalVA.toLocaleString()} VA | Main Breaker: ${mainCB} AT (${poleType})`;
+        document.getElementById('phaseTotals').innerHTML = `Total Phase A: ${sumA.toFixed(0)} VA | Total Phase B: ${sumB.toFixed(0)} VA | Total Phase C: ${sumC.toFixed(0)} VA`;
+        document.getElementById('totalSummary').innerHTML = `Total Computed Load: ${totalVA.toLocaleString()} VA | Main Breaker: ${mainCB} AT (${poleType})`;
 
         updateBOM(mainCB, poleType);
     }
@@ -151,22 +154,19 @@
         bomBody.innerHTML = '';
         if (!circuits.length) return;
 
-        // Main Breaker
         bomBody.innerHTML += `<tr><td>Main Circuit Breaker (${poleType}, Bolt-on)</td><td>1 unit - ${mainCB} AT</td></tr>`;
         
-        // Branch Breakers
         let cbCounts = {};
         circuits.forEach(c => cbCounts[c.cbAt] = (cbCounts[c.cbAt] || 0) + 1);
         for (let at in cbCounts) {
-            bomBody.innerHTML += `<tr><td>Branch Circuit Breaker (Plug-in/Bolt-on)</td><td>${cbCounts[at]} units - ${at} AT</td></tr>`;
+            bomBody.innerHTML += `<tr><td>Branch Circuit Breaker (Bolt-on)</td><td>${cbCounts[at]} units - ${at} AT</td></tr>`;
         }
 
-        // Wire Summary
         let wireSpecs = {};
         circuits.forEach(c => wireSpecs[c.wire] = true);
-        bomBody.innerHTML += `<tr><td>THHN/THWN Copper Wire (Stranded)</td><td>Specs used: ${Object.keys(wireSpecs).join(", ")}</td></tr>`;
+        bomBody.innerHTML += `<tr><td>THHN/THWN Copper Wire (Stranded)</td><td>Required Specs: ${Object.keys(wireSpecs).join(", ")}</td></tr>`;
         
-        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 (Indoor) or NEMA 3R (Outdoor)</td></tr>`;
+        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 Type with Ground Bus</td></tr>`;
     }
 </script>
 </body>
