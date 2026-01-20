@@ -9,7 +9,6 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: #f0f2f5; }
         .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         
-        /* Project Info Section */
         .project-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-left: 5px solid var(--accent); border-radius: 4px; }
         .project-info div { display: flex; flex-direction: column; }
         .project-info label { font-size: 10px; font-weight: bold; color: #777; }
@@ -18,42 +17,47 @@
         h2 { color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 10px; margin-top: 0; font-size: 1.5rem; }
         p.subtitle { margin-top: -10px; color: #6c757d; font-size: 0.85em; }
 
-        /* Responsive Input Group */
         .input-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; align-items: flex-end; }
-        .field { display: flex; flex-direction: column; gap: 5px; flex: 1 1 150px; } /* Flex grow/shrink with basis */
+        .field { display: flex; flex-direction: column; gap: 5px; flex: 1 1 150px; }
         
         label { font-size: 11px; font-weight: bold; color: #495057; text-transform: uppercase; }
         input, select, button { padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; width: 100%; box-sizing: border-box; }
         
         .btn-add { background-color: var(--success); color: white; cursor: pointer; border: none; font-weight: 600; height: 42px; }
-        .btn-print { background-color: var(--accent); color: white; cursor: pointer; border: none; font-weight: 600; padding: 12px 20px; border-radius: 6px; width: auto; margin-top: 15px; }
+        .btn-print { background-color: var(--accent); color: white; cursor: pointer; border: none; font-weight: 600; padding: 12px 20px; border-radius: 6px; width: auto; }
+        .btn-excel { background-color: #1d6f42; color: white; cursor: pointer; border: none; font-weight: 600; padding: 12px 20px; border-radius: 6px; width: auto; }
+        .btn-clear { background-color: #6c757d; color: white; cursor: pointer; border: none; font-weight: 600; padding: 12px 20px; border-radius: 6px; width: auto; }
         .btn-delete { background-color: var(--danger); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; line-height: 1; }
 
-        /* Table Responsiveness */
         .table-wrapper { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; background: white; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; background: white; min-width: 900px; }
         th, td { border: 1px solid #dee2e6; padding: 10px 5px; text-align: center; }
         th { background-color: #343a40; color: white; text-transform: uppercase; font-size: 10px; }
         
-        .summary-box { margin-top: 25px; padding: 20px; background: #e9ecef; border-radius: 8px; }
+        .schedule-footer { border: 2px solid #333; margin-top: 20px; padding: 15px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; font-family: 'Courier New', Courier, monospace; font-size: 13px; background-color: #fff; }
+        .formula-box { border-right: 1px solid #000; padding-right: 10px; }
+        .technical-details { padding-left: 10px; line-height: 1.8; }
+        .sum-line { border-top: 1px solid #000; width: 180px; margin: 2px 0; display: inline-block; }
+
         .bom-section { margin-top: 30px; border-top: 2px dashed #ccc; padding-top: 20px; }
         .bom-title { font-weight: bold; color: var(--primary); margin-bottom: 10px; font-size: 1.1em; }
 
-        /* Mobile Specific Adjustments */
+        .electrical-notes { margin-top: 30px; border: 1px solid #333; padding: 15px; font-size: 11px; line-height: 1.5; background: #fff; }
+        .notes-title { font-weight: bold; text-decoration: underline; margin-bottom: 8px; font-size: 12px; }
+
+        .branding { text-align: center; margin-top: 40px; font-size: 12px; color: #777; font-weight: bold; }
+
         @media (max-width: 600px) {
-            .container { padding: 15px; }
-            .input-group { padding: 15px; gap: 15px; }
-            .field { flex: 1 1 100%; } /* Stacks inputs vertically on mobile */
-            h2 { font-size: 1.2rem; }
+            .field { flex: 1 1 100%; }
+            .schedule-footer { grid-template-columns: 1fr; border-right: none; }
+            .formula-box { border-right: none; border-bottom: 1px solid #000; padding-bottom: 10px; }
+            .action-buttons { flex-direction: column; width: 100%; }
         }
 
         @media print {
-            .input-group, .btn-delete, .btn-print, .btn-delete-col, .project-info input { border: none !important; }
-            .input-group, .btn-delete, .btn-print, .btn-delete-col { display: none !important; }
-            body { padding: 0; background: white; }
+            .input-group, .btn-delete, .btn-print, .btn-excel, .btn-clear, .btn-delete-col { display: none !important; }
             .container { box-shadow: none; border: none; width: 100%; max-width: 100%; padding: 0; }
-            table { font-size: 10px; border: 1px solid black; }
-            th, td { border: 1px solid black; }
+            table, th, td, .schedule-footer, .electrical-notes { border: 1px solid black !important; color: black !important; }
         }
     </style>
 </head>
@@ -64,9 +68,9 @@
     <p class="subtitle">System: 230V/400V - Philippine Electrical Code Part 1</p>
 
     <div class="project-info">
-        <div><label>Project Name:</label><input type="text" placeholder="e.g. Residential Building"></div>
-        <div><label>Location:</label><input type="text" placeholder="e.g. Quezon City, PH"></div>
-        <div><label>Owner/Client:</label><input type="text" placeholder="Name"></div>
+        <div><label>Project Name:</label><input type="text" id="projName" placeholder="e.g. Residential LP-1"></div>
+        <div><label>Location:</label><input type="text" id="projLoc" placeholder="Project Site"></div>
+        <div><label>Owner/Client:</label><input type="text" id="projOwner" placeholder="Client Name"></div>
         <div><label>Date:</label><input type="date" id="currentDate"></div>
     </div>
     
@@ -84,7 +88,6 @@
                 <option value="acu2" data-va="2500">ACU 2.0 HP</option>
                 <option value="acu25" data-va="3200">ACU 2.5 HP</option>
                 <option value="acu3" data-va="4000">ACU 3.0 HP</option>
-                <option value="acu3_3ph" data-va="4000">ACU 3.0 HP (3-Phase)</option>
                 <option value="spare" data-va="1500">Spare Circuit</option>
             </select>
         </div>
@@ -100,18 +103,42 @@
         <table id="loadTable">
             <thead>
                 <tr>
-                    <th>Ckt</th><th>Description</th><th>Qty</th><th>VA (A)</th><th>VA (B)</th><th>VA (C)</th><th>Amps</th><th>CB (AT)</th><th>Wire</th><th class="btn-delete-col">Action</th>
+                    <th>Ckt</th><th>Description</th><th>Qty</th><th>VA (A)</th><th>VA (B)</th><th>VA (C)</th><th>Amps</th><th>CB (AT)</th><th>Wire & Conduit</th><th class="btn-delete-col">Action</th>
                 </tr>
             </thead>
             <tbody></tbody>
+            <tfoot>
+                <tr style="font-weight: bold; background: #eee;">
+                    <td colspan="3">TOTAL</td>
+                    <td id="footA">0</td><td id="footB">0</td><td id="footC">0</td>
+                    <td colspan="4" id="totalVAFoot">Total VA: 0</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 
-    <div class="summary-box">
-        <div id="phaseTotals" style="font-size: 0.9em; color: #555;">Total Phase A: 0 VA | Total Phase B: 0 VA | Total Phase C: 0 VA</div>
-        <div id="totalSummary" style="font-size: 1.2em; font-weight: bold; color: var(--primary); margin-top:10px;">
-            Total Computed Load: 0 VA | Main Breaker: 0 AT
+    <div class="schedule-footer" id="techFooter">
+        <div class="formula-box">
+            <div id="formulaLine1">IL @ 80% D.F. = (0 VA x 80%) x 1.25</div>
+            <span class="sum-line"></span><br>
+            <div style="padding-left: 60px;">230 V</div>
+            <div id="calculatedAmps" style="font-weight: bold; margin-top: 10px; font-size: 16px;">= 0.0 A</div>
         </div>
+        <div class="technical-details">
+            <div>FEEDER: <span id="feederWire" style="font-weight:bold;">---</span></div>
+            <div>PROTECTION: <span id="feederProt" style="font-weight:bold;">---</span></div>
+            <div style="margin-top: 5px; font-size: 11px;">Calculated based on PEC Table 3.10.1.16 & 2.50.6.13</div>
+        </div>
+    </div>
+
+    <div class="electrical-notes">
+        <div class="notes-title">GENERAL ELECTRICAL NOTES AND SPECIFICATIONS:</div>
+        1. ALL ELECTRICAL WORKS HEREIN SHALL BE DONE IN ACCORDANCE WITH THE PROVISIONS OF THE LATEST EDITION OF THE PHILIPPINE ELECTRICAL CODE (PEC), THE RULES AND REGULATIONS OF LOCAL AUTHORITIES AND THE REQUIREMENTS OF THE LOCAL POWER COMPANY.<br>
+        2. MINIMUM WIRE SIZE FOR LIGHTING SHALL BE 2.0 mm² THHN AND 3.5 mm² THHN FOR CONVENIENCE OUTLETS IN ACCORDANCE WITH PEC ARTICLE 3.10.<br>
+        3. EQUIPMENT GROUNDING CONDUCTORS SHALL BE SIZED PER PEC TABLE 2.50.6.13 BASED ON THE RATING OF THE OVERCURRENT PROTECTIVE DEVICE (OCPD).<br>
+        4. ALL CONDUITS SHALL BE UNPLASTICIZED POLYVINYL CHLORIDE (uPVC) SCHEDULE 40 OR EMT AS SPECIFIED. MINIMUM CONDUIT SIZE SHALL BE 15mmØ.<br>
+        5. ALL ELECTRICAL MATERIALS TO BE USED SHALL BE NEW AND OF APPROVED TYPE FOR BOTH LOCATION AND PURPOSE.<br>
+        6. MOUNTING HEIGHTS: LIGHT SWITCHES (1.2m ABOVE FINISHED FLOOR); CONVENIENCE OUTLETS (0.3m ABOVE FINISHED FLOOR) UNLESS OTHERWISE NOTED.
     </div>
 
     <div class="bom-section">
@@ -124,14 +151,18 @@
                 <tbody></tbody>
             </table>
         </div>
-        <button class="btn-print" onclick="window.print()">PRINT / DOWNLOAD PDF</button>
+        <div class="action-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+            <button class="btn-excel" onclick="exportToExcel()">SAVE DATA (EXCEL)</button>
+            <button class="btn-print" onclick="window.print()">PRINT / PDF</button>
+            <button class="btn-clear" onclick="clearAllData()">CLEAR ALL</button>
+        </div>
     </div>
+
+    <div class="branding">Created by: JPAJ™</div>
 </div>
 
 <script>
-    // Set default date to today
     document.getElementById('currentDate').valueAsDate = new Date();
-
     let circuits = [];
 
     function applyTemplate() {
@@ -145,77 +176,156 @@
     }
 
     function addCircuit() {
-        const desc = document.getElementById('desc').value, 
-              va = parseFloat(document.getElementById('va').value), 
-              qty = parseInt(document.getElementById('qty').value), 
-              type = document.getElementById('loadType').value, 
-              phase = document.getElementById('phaseSel').value;
-        
+        const desc = document.getElementById('desc').value, va = parseFloat(document.getElementById('va').value), qty = parseInt(document.getElementById('qty').value), type = document.getElementById('loadType').value, phase = document.getElementById('phaseSel').value;
         if (!desc || isNaN(va)) return alert("Fill fields");
-
         const totalVA = va * qty;
         let vaA = 0, vaB = 0, vaC = 0, amps = (type === "1") ? (totalVA / 230) : (totalVA / (400 * 1.73205));
+        if (type === "1") { if (phase === "A") vaA = totalVA; else if (phase === "B") vaB = totalVA; else vaC = totalVA; }
+        else { vaA = vaB = vaC = totalVA / 3; }
         
-        if (type === "1") { 
-            if (phase === "A") vaA = totalVA; else if (phase === "B") vaB = totalVA; else vaC = totalVA;
-        } else { vaA = vaB = vaC = totalVA / 3; }
+        let cbAt = [15, 20, 30, 40, 50, 60, 70, 100, 125, 150, 200].find(b => b >= amps * 1.25) || 250;
+        
+        let wireDetail = "";
+        let cond = "";
+        let groundWire = "2.0mm²"; 
 
-        let cbAt = [15, 20, 30, 40, 50, 60, 70, 100, 125, 150, 200, 250].find(b => b >= amps * 1.25) || 250;
-        let wire = cbAt <= 15 ? "2.0 mm²" : cbAt <= 20 ? "3.5 mm²" : cbAt <= 30 ? "5.5 mm²" : cbAt <= 40 ? "8.0 mm²" : cbAt <= 55 ? "14.0 mm²" : cbAt <= 80 ? "22.0 mm²" : "30.0 mm²";
+        if (desc.toLowerCase().includes("lighting")) {
+            wireDetail = `2-2.0mm² THHN + 1-2.0mm² G`;
+            cond = "15mmØ";
+        } else if (desc.toLowerCase().includes("outlet") || desc.toLowerCase().includes("refrigerator")) {
+            wireDetail = `2-3.5mm² THHN + 1-2.0mm² G`;
+            cond = "15mmØ";
+        } else {
+            let wireSize = cbAt <= 20 ? "3.5mm²" : cbAt <= 30 ? "5.5mm²" : cbAt <= 40 ? "8.0mm²" : "14.0mm²";
+            if (cbAt > 20 && cbAt <= 60) groundWire = "3.5mm²";
+            else if (cbAt > 60 && cbAt <= 100) groundWire = "5.5mm²";
+            else if (cbAt > 100) groundWire = "8.0mm²";
 
-        circuits.push({ desc, qty, vaA, vaB, vaC, totalVA, amps, cbAt, wire, type, phase });
+            let hotWires = (type === "1") ? "2" : "3";
+            wireDetail = `${hotWires}-${wireSize} THHN + 1-${groundWire} G`;
+            cond = cbAt <= 30 ? "15mmØ" : "20mmØ";
+        }
+
+        circuits.push({ desc, qty, vaA, vaB, vaC, totalVA, amps, cbAt, wireDetail, cond, type, phase });
         updateTable();
-        // Clear description for next entry
         document.getElementById('desc').value = '';
     }
 
     function removeCircuit(index) { circuits.splice(index, 1); updateTable(); }
 
+    function clearAllData() {
+        if (confirm("Are you sure you want to clear the load schedule and BOM?")) {
+            circuits = [];
+            updateTable();
+            document.getElementById('template').selectedIndex = 0;
+            document.getElementById('desc').value = '';
+            document.getElementById('va').value = '';
+            document.getElementById('qty').value = 1;
+        }
+    }
+
     function updateTable() {
         const tbody = document.querySelector('#loadTable tbody');
         tbody.innerHTML = '';
-        let sumA = 0, sumB = 0, sumC = 0, hasThreePhase = false, phasesUsed = new Set();
+        let sumA = 0, sumB = 0, sumC = 0, has3Ph = false, pUsed = new Set();
 
         circuits.forEach((c, i) => {
             sumA += c.vaA; sumB += c.vaB; sumC += c.vaC;
-            if (c.type === "3") hasThreePhase = true;
-            if (c.vaA > 0) phasesUsed.add("A"); if (c.vaB > 0) phasesUsed.add("B"); if (c.vaC > 0) phasesUsed.add("C");
-
-            tbody.innerHTML += `<tr><td>${i+1}</td><td style="text-align:left">${c.desc}</td><td>${c.qty}</td><td>${c.vaA.toFixed(0) || '-'}</td><td>${c.vaB.toFixed(0) || '-'}</td><td>${c.vaC.toFixed(0) || '-'}</td><td>${c.amps.toFixed(2)}</td><td>${c.cbAt} AT</td><td>${c.wire}</td><td class="btn-delete-col"><button class="btn-delete" onclick="removeCircuit(${i})">✕</button></td></tr>`;
+            if (c.type === "3") has3Ph = true;
+            if (c.vaA > 0) pUsed.add("A"); if (c.vaB > 0) pUsed.add("B"); if (c.vaC > 0) pUsed.add("C");
+            
+            tbody.innerHTML += `<tr><td>${i+1}</td><td style="text-align:left">${c.desc}</td><td>${c.qty}</td><td>${c.vaA.toFixed(0) || '-'}</td><td>${c.vaB.toFixed(0) || '-'}</td><td>${c.vaC.toFixed(0) || '-'}</td><td>${c.amps.toFixed(2)}</td><td>${c.cbAt} AT</td><td>${c.wireDetail} IN ${c.cond} C</td><td class="btn-delete-col"><button class="btn-delete" onclick="removeCircuit(${i})">✕</button></td></tr>`;
         });
 
+        document.getElementById('footA').innerText = sumA.toFixed(0);
+        document.getElementById('footB').innerText = sumB.toFixed(0);
+        document.getElementById('footC').innerText = sumC.toFixed(0);
         const totalVA = sumA + sumB + sumC;
-        const isActuallyThreePhase = hasThreePhase || phasesUsed.size > 1;
+        document.getElementById('totalVAFoot').innerText = "Total VA: " + totalVA.toLocaleString();
+
+        const is3Ph = has3Ph || pUsed.size > 1;
         const maxPhase = Math.max(sumA, sumB, sumC);
-        const mainAmps = isActuallyThreePhase ? (maxPhase * 3 / (400 * 1.73205)) : (totalVA / 230);
-        const mainCB = circuits.length ? ([30, 40, 50, 60, 70, 100, 125, 150, 200, 250, 300, 400].find(b => b >= mainAmps * 1.25) || 0) : 0;
-        const poleType = isActuallyThreePhase ? "3-Pole" : "2-Pole";
+        const demandFactor = 0.8;
+        const mainAmps = is3Ph ? ((maxPhase * 3 * demandFactor * 1.25) / (400 * 1.73205)) : ((totalVA * demandFactor * 1.25) / 230);
+        
+        const cbList = [30, 40, 50, 60, 70, 100, 125, 150, 175, 200, 225, 250, 400];
+        const mainCB = cbList.find(b => b >= mainAmps) || 60;
+        const poleType = is3Ph ? "3P" : "2P";
+        const voltLabel = is3Ph ? "230V/400V" : "230V";
 
-        document.getElementById('phaseTotals').innerHTML = `Total Phase A: ${sumA.toFixed(0)} VA | Total Phase B: ${sumB.toFixed(0)} VA | Total Phase C: ${sumC.toFixed(0)} VA`;
-        document.getElementById('totalSummary').innerHTML = `Total Computed Load: ${totalVA.toLocaleString()} VA | Main Breaker: ${mainCB} AT (${poleType})`;
+        document.getElementById('formulaLine1').innerText = `IL @ 80% D.F. = (${totalVA.toLocaleString()} VA x 0.8) x 1.25`;
+        document.getElementById('calculatedAmps').innerText = `= ${mainAmps.toFixed(2)} A`;
+        
+        let fWireSize, fConduitSize, fWireCount = is3Ph ? "3" : "2"; 
+        let fGroundSize = "5.5mm²"; 
 
-        updateBOM(mainCB, poleType);
+        if (mainCB <= 30) { fWireSize = "5.5mm²"; fConduitSize = "15mmØ"; fGroundSize = "3.5mm²"; }
+        else if (mainCB <= 40) { fWireSize = "8.0mm²"; fConduitSize = "20mmØ"; fGroundSize = "3.5mm²"; }
+        else if (mainCB <= 60) { fWireSize = "14.0mm²"; fConduitSize = "25mmØ"; fGroundSize = "5.5mm²"; }
+        else if (mainCB <= 100) { fWireSize = "30.0mm²"; fConduitSize = "32mmØ"; fGroundSize = "8.0mm²"; }
+        else if (mainCB <= 150) { fWireSize = "38.0mm²"; fConduitSize = "40mmØ"; fGroundSize = "8.0mm²"; }
+        else { fWireSize = "50.0mm²"; fConduitSize = "50mmØ"; fGroundSize = "14.0mm²"; }
+
+        document.getElementById('feederWire').innerText = `${fWireCount}-${fWireSize} THHN + 1-${fGroundSize} G IN ${fConduitSize} C`;
+        document.getElementById('feederProt').innerText = `${mainCB} AT, ${mainCB > 100 ? '225' : '100'} AF, ${poleType}, ${voltLabel}`;
+
+        updateBOM(mainCB, poleType, fWireCount, fWireSize, fGroundSize);
     }
 
-    function updateBOM(mainCB, poleType) {
+    function updateBOM(mainCB, poleType, fWireCount, fWireSize, fGroundSize) {
         const bomBody = document.querySelector('#bomTable tbody');
         bomBody.innerHTML = '';
-        if (!circuits.length) return;
-
+        if (circuits.length === 0) return;
         bomBody.innerHTML += `<tr><td>Main Circuit Breaker (${poleType}, Bolt-on)</td><td>1 unit - ${mainCB} AT</td></tr>`;
-        
         let cbCounts = {};
         circuits.forEach(c => cbCounts[c.cbAt] = (cbCounts[c.cbAt] || 0) + 1);
-        for (let at in cbCounts) {
-            bomBody.innerHTML += `<tr><td>Branch Circuit Breaker (Bolt-on)</td><td>${cbCounts[at]} units - ${at} AT</td></tr>`;
-        }
-
-        let wireSpecs = {};
-        circuits.forEach(c => wireSpecs[c.wire] = true);
-        bomBody.innerHTML += `<tr><td>THHN/THWN Copper Wire (Stranded)</td><td>Required Specs: ${Object.keys(wireSpecs).join(", ")}</td></tr>`;
+        for (let at in cbCounts) { bomBody.innerHTML += `<tr><td>Branch Circuit Breaker (Bolt-on)</td><td>${cbCounts[at]} units - ${at} AT</td></tr>`; }
         
-        let totalSlots = circuits.length + 2;
-        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 Type (Min. ${totalSlots} Branches)</td></tr>`;
+        let wireSpecs = {};
+        circuits.forEach(c => {
+            let parts = c.wireDetail.split(' ');
+            wireSpecs[parts[0].split('-')[1]] = true;
+            wireSpecs[parts[2].split('-')[1]] = true;
+        });
+        wireSpecs[fWireSize] = true;
+        wireSpecs[fGroundSize] = true;
+
+        bomBody.innerHTML += `<tr><td>THHN/THWN Copper Wire (Stranded)</td><td>Required: ${Object.keys(wireSpecs).sort().join(", ")}</td></tr>`;
+        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 (Min. ${circuits.length + 2} Branches)</td></tr>`;
+    }
+
+    function exportToExcel() {
+        if (circuits.length === 0) return alert("No data to export!");
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += `PROJECT INFORMATION\n`;
+        csvContent += `Project Name,${document.getElementById('projName').value}\n`;
+        csvContent += `Location,${document.getElementById('projLoc').value}\n`;
+        csvContent += `Owner,${document.getElementById('projOwner').value}\n`;
+        csvContent += `Date,${document.getElementById('currentDate').value}\n\n`;
+        csvContent += "SCHEDULE OF LOADS\n";
+        csvContent += "Ckt #,Description,Qty,VA (Phase A),VA (Phase B),VA (Phase C),Amperes,CB (AT),Wire & Conduit\n";
+        circuits.forEach((c, i) => {
+            csvContent += `${i+1},"${c.desc}",${c.qty},${c.vaA || 0},${c.vaB || 0},${c.vaC || 0},${c.amps.toFixed(2)},${c.cbAt},"${c.wireDetail} IN ${c.cond} C"\n`;
+        });
+        csvContent += `TOTALS,, ,${document.getElementById('footA').innerText},${document.getElementById('footB').innerText},${document.getElementById('footC').innerText},,,\n\n`;
+        csvContent += "TECHNICAL SPECIFICATIONS\n";
+        csvContent += `Computed Load Current,${document.getElementById('calculatedAmps').innerText.replace('= ', '')}\n`;
+        csvContent += `Feeder Line,${document.getElementById('feederWire').innerText}\n`;
+        csvContent += `Main Protection,${document.getElementById('feederProt').innerText}\n\n`;
+        csvContent += "BILL OF MATERIALS\n";
+        csvContent += "Item,Quantity/Specs\n";
+        const bomRows = document.querySelectorAll('#bomTable tbody tr');
+        bomRows.forEach(row => {
+            const cols = row.querySelectorAll('td');
+            csvContent += `"${cols[0].innerText}","${cols[1].innerText}"\n`;
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `PEC_Load_Schedule_${document.getElementById('projName').value || 'Export'}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 </script>
 </body>
