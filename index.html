@@ -48,6 +48,7 @@
                 <option value="acu25" data-va="3200">ACU 2.5 HP</option>
                 <option value="acu3" data-va="4000">ACU 3.0 HP</option>
                 <option value="acu3_3ph" data-va="4000">ACU 3.0 HP (3-Phase)</option>
+                <option value="spare" data-va="1500">Spare Circuit (Provision)</option>
             </select>
         </div>
         <div class="field" style="flex: 1.5;"><label>Description</label><input type="text" id="desc"></div>
@@ -166,7 +167,9 @@
         circuits.forEach(c => wireSpecs[c.wire] = true);
         bomBody.innerHTML += `<tr><td>THHN/THWN Copper Wire (Stranded)</td><td>Required Specs: ${Object.keys(wireSpecs).join(", ")}</td></tr>`;
         
-        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 Type with Ground Bus</td></tr>`;
+        // Panel size logic: Circuits + 2 for spacing/spares
+        let totalSlots = circuits.length + 2;
+        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 Type (at least ${totalSlots} Branches)</td></tr>`;
     }
 </script>
 </body>
