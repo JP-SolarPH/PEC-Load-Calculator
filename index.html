@@ -9,6 +9,7 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: #f0f2f5; }
         .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         
+        /* Tabs System */
         .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; gap: 5px; overflow-x: auto; }
         .tab { padding: 12px 20px; cursor: pointer; background: #eee; border-radius: 8px 8px 0 0; font-weight: bold; color: var(--gray); white-space: nowrap; transition: 0.3s; }
         .tab.active { background: var(--primary); color: white; }
@@ -31,7 +32,7 @@
         th, td { border: 1px solid #dee2e6; padding: 10px 5px; text-align: center; font-size: 12px; }
         th { background-color: #343a40; color: white; text-transform: uppercase; }
         
-        .schedule-footer { border: 2px solid #333; margin-top: 20px; padding: 15px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; font-family: 'Courier New', monospace; font-size: 13px; }
+        .schedule-footer { border: 2px solid #333; margin-top: 20px; padding: 15px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; font-family: 'Courier New', monospace; font-size: 13px; background-color: #fff; }
         .formula-line { font-size: 12px; margin-bottom: 5px; font-weight: bold; }
         .sum-line { border-top: 1px solid #000; width: 220px; margin: 2px 0; display: inline-block; }
 
@@ -215,6 +216,7 @@
                     <div class="panel-main" id="mainViz">--- AT</div>
                     <div class="panel-bus" id="busViz"></div>
                 </div>
+                <div id="enclosureNote" style="font-size:12px; margin-top:10px; font-weight:bold; color:var(--primary); text-align:center;">REQUIRED: NEMA 1 Enclosure (Indoor)</div>
             </div>
 
             <div class="inspection-notes">
@@ -310,7 +312,7 @@
             document.getElementById('imbalanceAlert').innerHTML = imbalance > 15 ? `<span class="alert-badge bg-danger">IMBALANCE: ${imbalance.toFixed(1)}%</span>` : `<span class="alert-badge bg-success">BALANCED</span>`;
         }
 
-        updateBOM(mainCB, fWire, fCond);
+        updateBOM(mainCB, fWire, fCond, has3P);
         drawPanelAndSLD(mainCB, has3P);
     }
 
@@ -360,13 +362,21 @@
         res.innerHTML = `Fault Level: ${I_fault.toFixed(2)} kA - ${I_fault > 10 ? 'High KAIC required' : '10 KAIC okay'}`;
     }
 
-    function updateBOM(mainCB, fWire, fCond) {
+    function updateBOM(mainCB, fWire, fCond, has3P) {
         const bomBody = document.querySelector('#bomTable tbody'); bomBody.innerHTML = '';
         if (circuits.length === 0) return;
+        
+        let branches = circuits.length + 2;
+        let panelSize = branches <= 6 ? 6 : branches <= 8 ? 8 : branches <= 12 ? 12 : 24;
+        let enclosureType = "NEMA 1 (Indoor Type, Flush/Surface)";
+        
         bomBody.innerHTML += `<tr><td>Main Breaker (Bolt-on)</td><td>1 unit - ${mainCB} AT</td></tr>`;
         let cbCounts = {}; circuits.forEach(c => cbCounts[c.cbAt] = (cbCounts[c.cbAt] || 0) + 1);
         for(let at in cbCounts) bomBody.innerHTML += `<tr><td>Branch Breakers</td><td>${cbCounts[at]} units - ${at} AT</td></tr>`;
         bomBody.innerHTML += `<tr><td>Service Entrance Feeder</td><td>${fWire} THHN in ${fCond} Conduit</td></tr>`;
+        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - ${panelSize} Branches, ${enclosureType}</td></tr>`;
+        
+        document.getElementById('enclosureNote').innerText = `REQUIRED: ${panelSize}-Branch ${enclosureType}`;
     }
 
     function clearAllData() { if(confirm("Clear all?")) { circuits = []; updateTable(); } }
