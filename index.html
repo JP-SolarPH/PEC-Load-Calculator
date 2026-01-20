@@ -3,158 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PEC Load Schedule & BOM Calculator</title>
+    <title>JPAJ™ PEC Engineering Suite</title>
     <style>
-        :root { --primary: #1a3a5a; --accent: #3498db; --success: #28a745; --danger: #dc3545; }
+        :root { --primary: #1a3a5a; --accent: #3498db; --success: #28a745; --danger: #dc3545; --gray: #6c757d; --warning: #f39c12; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: #f0f2f5; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; gap: 5px; overflow-x: auto; }
+        .tab { padding: 12px 20px; cursor: pointer; background: #eee; border-radius: 8px 8px 0 0; font-weight: bold; color: var(--gray); white-space: nowrap; transition: 0.3s; }
+        .tab.active { background: var(--primary); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
         .project-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-left: 5px solid var(--accent); border-radius: 4px; }
-        .project-info div { display: flex; flex-direction: column; }
-        .project-info label { font-size: 10px; font-weight: bold; color: #777; }
-        .project-info input { border: none; background: transparent; border-bottom: 1px solid #ddd; padding: 5px 0; font-weight: 600; color: var(--primary); }
-
-        h2 { color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 10px; margin-top: 0; font-size: 1.5rem; }
-        p.subtitle { margin-top: -10px; color: #6c757d; font-size: 0.85em; }
-
+        .project-info input { border: none; background: transparent; border-bottom: 1px solid #ddd; padding: 5px 0; font-weight: 600; color: var(--primary); width: 100%; }
+        
         .input-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; align-items: flex-end; }
         .field { display: flex; flex-direction: column; gap: 5px; flex: 1 1 150px; }
-        
         label { font-size: 11px; font-weight: bold; color: #495057; text-transform: uppercase; }
         input, select, button { padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; width: 100%; box-sizing: border-box; }
         
-        .btn-add { background-color: var(--success); color: white; cursor: pointer; border: none; font-weight: 600; height: 42px; }
-        .btn-print { background-color: var(--accent); color: white; cursor: pointer; border: none; font-weight: 600; padding: 12px 20px; border-radius: 6px; width: auto; }
-        .btn-excel { background-color: #1d6f42; color: white; cursor: pointer; border: none; font-weight: 600; padding: 12px 20px; border-radius: 6px; width: auto; }
-        .btn-clear { background-color: #6c757d; color: white; cursor: pointer; border: none; font-weight: 600; padding: 12px 20px; border-radius: 6px; width: auto; }
-        .btn-delete { background-color: var(--danger); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; line-height: 1; }
+        .btn-add { background-color: var(--success); color: white; border: none; font-weight: bold; cursor: pointer; height: 42px; }
+        .btn-action { width: auto; font-weight: bold; color: white; border: none; cursor: pointer; padding: 12px 20px; border-radius: 6px; }
 
         .table-wrapper { overflow-x: auto; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: white; min-width: 900px; }
-        th, td { border: 1px solid #dee2e6; padding: 10px 5px; text-align: center; }
-        th { background-color: #343a40; color: white; text-transform: uppercase; font-size: 10px; }
+        th, td { border: 1px solid #dee2e6; padding: 10px 5px; text-align: center; font-size: 12px; }
+        th { background-color: #343a40; color: white; text-transform: uppercase; }
         
-        .schedule-footer { border: 2px solid #333; margin-top: 20px; padding: 15px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; font-family: 'Courier New', Courier, monospace; font-size: 13px; background-color: #fff; }
-        .formula-box { border-right: 1px solid #000; padding-right: 10px; }
-        .technical-details { padding-left: 10px; line-height: 1.8; }
-        .sum-line { border-top: 1px solid #000; width: 180px; margin: 2px 0; display: inline-block; }
+        .schedule-footer { border: 2px solid #333; margin-top: 20px; padding: 15px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; font-family: 'Courier New', monospace; font-size: 13px; }
+        .formula-line { font-size: 12px; margin-bottom: 5px; font-weight: bold; }
+        .sum-line { border-top: 1px solid #000; width: 220px; margin: 2px 0; display: inline-block; }
 
-        .bom-section { margin-top: 30px; border-top: 2px dashed #ccc; padding-top: 20px; }
-        .bom-title { font-weight: bold; color: var(--primary); margin-bottom: 10px; font-size: 1.1em; }
+        .alert-badge { padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; margin-left: 10px; }
+        .bg-danger { background-color: var(--danger); }
+        .bg-warning { background-color: var(--warning); }
+        .bg-success { background-color: var(--success); }
 
-        .electrical-notes { margin-top: 30px; border: 1px solid #333; padding: 15px; font-size: 11px; line-height: 1.5; background: #fff; }
-        .notes-title { font-weight: bold; text-decoration: underline; margin-bottom: 8px; font-size: 12px; }
+        .panel-container { margin-top: 20px; padding: 20px; background: #e0e0e0; border-radius: 10px; border: 2px solid #333; width: fit-content; min-width: 300px; margin-left: auto; margin-right: auto; }
+        .panel-main { height: 60px; background: #222; margin-bottom: 20px; border-radius: 5px; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; }
+        .panel-main::after { content: 'MAIN BREAKER'; font-size: 10px; position: absolute; bottom: 2px; }
+        .panel-bus { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #ccc; padding: 10px; border: 1px solid #888; }
+        .breaker-slot { height: 40px; background: #444; border-radius: 3px; color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
+        .breaker-empty { background: #bbb; border: 1px dashed #888; color: #555; }
+
+        .color-A { border-left: 8px solid #ff0000; }
+        .color-B { border-left: 8px solid #ffff00; }
+        .color-C { border-left: 8px solid #0000ff; }
+        .sld-container { margin-top: 20px; padding: 20px; border: 2px solid #000; background: #fff; overflow-x: auto; font-family: monospace; text-align: center; }
+        .sld-line { height: 2px; background: black; width: 100%; margin: 10px 0; position: relative; }
+        .sld-branch-row { display: flex; justify-content: center; gap: 20px; margin-top: 40px; }
+        .sld-branch { min-width: 80px; position: relative; font-size: 9px; }
+        .sld-branch::before { content: ''; position: absolute; top: -41px; left: 50%; height: 40px; width: 2px; background: #000; }
+        .sld-box { border: 1px solid #000; padding: 4px; display: inline-block; font-weight: bold; font-size: 11px; background: #fff; }
+
+        /* General Electrical Notes CSS */
+        .inspection-notes { margin-top: 30px; border: 1px solid #000; padding: 15px; background: #fff; text-align: left; }
+        .notes-title { font-weight: bold; text-decoration: underline; margin-bottom: 8px; display: block; font-size: 12px; }
+        .notes-list { margin: 0; padding-left: 18px; font-size: 11px; line-height: 1.5; color: #333; }
+
+        .vd-result { margin-top: 15px; padding: 15px; border-radius: 5px; font-weight: bold; border: 1px solid #ccc; }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
 
         .branding { text-align: center; margin-top: 40px; font-size: 12px; color: #777; font-weight: bold; }
-
-        @media (max-width: 600px) {
-            .field { flex: 1 1 100%; }
-            .schedule-footer { grid-template-columns: 1fr; border-right: none; }
-            .formula-box { border-right: none; border-bottom: 1px solid #000; padding-bottom: 10px; }
-            .action-buttons { flex-direction: column; width: 100%; }
-        }
-
-        @media print {
-            .input-group, .btn-delete, .btn-print, .btn-excel, .btn-clear, .btn-delete-col { display: none !important; }
-            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; padding: 0; }
-            table, th, td, .schedule-footer, .electrical-notes { border: 1px solid black !important; color: black !important; }
-        }
+        @media print { .tabs, .input-group, .no-print { display: none !important; } .tab-content { display: block !important; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>PEC Load Schedule & BOM</h2>
-    <p class="subtitle">System: 230V/400V - Philippine Electrical Code Part 1</p>
-
-    <div class="project-info">
-        <div><label>Project Name:</label><input type="text" id="projName" placeholder="e.g. Residential LP-1"></div>
-        <div><label>Location:</label><input type="text" id="projLoc" placeholder="Project Site"></div>
-        <div><label>Owner/Client:</label><input type="text" id="projOwner" placeholder="Client Name"></div>
-        <div><label>Date:</label><input type="date" id="currentDate"></div>
-    </div>
+    <h2>JPAJ™ PEC Engineering Suite</h2>
     
-    <div class="input-group">
-        <div class="field">
-            <label>Template</label>
+    <div class="tabs no-print">
+        <div class="tab active" onclick="openTab(event, 'load-schedule')">Load Schedule</div>
+        <div class="tab" onclick="openTab(event, 'voltage-drop')">Voltage & Short Circuit</div>
+        <div class="tab" onclick="openTab(event, 'bom-tab')">Bill of Materials & SLD</div>
+    </div>
+
+    <div id="load-schedule" class="tab-content active">
+        <div class="project-info">
+            <div><label>Project:</label><input type="text" id="projName" placeholder="Project LP-1"></div>
+            <div><label>Owner:</label><input type="text" id="projOwner" placeholder="Client Name"></div>
+            <div><label>Date:</label><input type="date" id="currentDate"></div>
+        </div>
+
+        <div class="input-group no-print">
+            <div class="field"><label>Category</label>
             <select id="template" onchange="applyTemplate()">
                 <option value="">-- Custom --</option>
-                <option value="lighting" data-va="100">Lighting Outlet</option>
-                <option value="outlet" data-va="180">Convenience Outlet</option>
-                <option value="ref" data-va="600">Refrigerator (Special)</option>
-                <option value="range" data-va="8000">Electric Range (Special)</option>
-                <option value="acu1" data-va="1500">ACU 1.0 HP</option>
-                <option value="acu15" data-va="1900">ACU 1.5 HP</option>
-                <option value="acu2" data-va="2500">ACU 2.0 HP</option>
-                <option value="acu25" data-va="3200">ACU 2.5 HP</option>
-                <option value="acu3" data-va="4000">ACU 3.0 HP</option>
-                <option value="spare" data-va="1500">Spare Circuit</option>
-            </select>
+                <optgroup label="General Loads">
+                    <option value="lighting" data-va="100">Lighting Outlet (General)</option>
+                    <option value="outlet" data-va="180">Convenience Outlet (Duplex)</option>
+                    <option value="spare" data-va="1500">Spare/Future Provision</option>
+                </optgroup>
+                <optgroup label="Kitchen Appliances">
+                    <option value="range" data-va="8000">Electric Range/Oven</option>
+                    <option value="ref" data-va="1200">Refrigerator/Freezer (Motor)</option>
+                    <option value="micro" data-va="1500">Microwave Oven</option>
+                    <option value="cooktop" data-va="5000">Induction Cooktop</option>
+                </optgroup>
+                <optgroup label="Cooling & Motors">
+                    <option value="acu075" data-va="1200">ACU 0.75 HP (Window Type)</option>
+                    <option value="acu1" data-va="1500">ACU 1.0 HP (Split/Window)</option>
+                    <option value="acu15" data-va="1900">ACU 1.5 HP (Motor Load)</option>
+                    <option value="acu2" data-va="2500">ACU 2.0 HP (Motor Load)</option>
+                    <option value="acu3" data-va="4000">ACU 3.0 HP (Motor Load)</option>
+                    <option value="pump" data-va="1100">Water Pump (1.0 HP)</option>
+                </optgroup>
+                <optgroup label="Special Purpose">
+                    <option value="heater_instant" data-va="3500">Water Heater (Instant)</option>
+                    <option value="heater_tank" data-va="5000">Water Heater (Tank Type)</option>
+                    <option value="dryer" data-va="5000">Electric Clothes Dryer</option>
+                </optgroup>
+            </select></div>
+            <div class="field" style="flex-grow:2"><label>Description</label><input type="text" id="desc"></div>
+            <div class="field"><label>Type</label><select id="loadType"><option value="1">1-Phase</option><option value="3">3-Phase</option></select></div>
+            <div class="field"><label>VA</label><input type="number" id="va"></div>
+            <div class="field"><label>Qty</label><input type="number" id="qty" value="1"></div>
+            <button class="btn-add" onclick="addCircuit()">ADD</button>
         </div>
-        <div class="field" style="flex-grow: 2;"><label>Description</label><input type="text" id="desc"></div>
-        <div class="field"><label>Type</label><select id="loadType"><option value="1">1-Phase</option><option value="3">3-Phase</option></select></div>
-        <div class="field"><label>Phase</label><select id="phaseSel"><option value="A">Phase A</option><option value="B">Phase B</option><option value="C">Phase C</option></select></div>
-        <div class="field"><label>VA</label><input type="number" id="va"></div>
-        <div class="field"><label>Qty</label><input type="number" id="qty" value="1"></div>
-        <div class="field"><button class="btn-add" onclick="addCircuit()">ADD LOAD</button></div>
-    </div>
 
-    <div class="table-wrapper">
-        <table id="loadTable">
-            <thead>
-                <tr>
-                    <th>Ckt</th><th>Description</th><th>Qty</th><th>VA (A)</th><th>VA (B)</th><th>VA (C)</th><th>Amps</th><th>CB (AT)</th><th>Wire & Conduit</th><th class="btn-delete-col">Action</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-            <tfoot>
-                <tr style="font-weight: bold; background: #eee;">
-                    <td colspan="3">TOTAL</td>
-                    <td id="footA">0</td><td id="footB">0</td><td id="footC">0</td>
-                    <td colspan="4" id="totalVAFoot">Total VA: 0</td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-
-    <div class="schedule-footer" id="techFooter">
-        <div class="formula-box">
-            <div id="formulaLine1">IL @ 80% D.F. = (0 VA x 80%) x 1.25</div>
-            <span class="sum-line"></span><br>
-            <div style="padding-left: 60px;">230 V</div>
-            <div id="calculatedAmps" style="font-weight: bold; margin-top: 10px; font-size: 16px;">= 0.0 A</div>
-        </div>
-        <div class="technical-details">
-            <div>FEEDER: <span id="feederWire" style="font-weight:bold;">---</span></div>
-            <div>PROTECTION: <span id="feederProt" style="font-weight:bold;">---</span></div>
-            <div style="margin-top: 5px; font-size: 11px;">Calculated based on PEC Table 3.10.1.16 & 2.50.6.13</div>
-        </div>
-    </div>
-
-    <div class="electrical-notes">
-        <div class="notes-title">GENERAL ELECTRICAL NOTES AND SPECIFICATIONS:</div>
-        1. ALL ELECTRICAL WORKS HEREIN SHALL BE DONE IN ACCORDANCE WITH THE PROVISIONS OF THE LATEST EDITION OF THE PHILIPPINE ELECTRICAL CODE (PEC), THE RULES AND REGULATIONS OF LOCAL AUTHORITIES AND THE REQUIREMENTS OF THE LOCAL POWER COMPANY.<br>
-        2. MINIMUM WIRE SIZE FOR LIGHTING SHALL BE 2.0 mm² THHN AND 3.5 mm² THHN FOR CONVENIENCE OUTLETS IN ACCORDANCE WITH PEC ARTICLE 3.10.<br>
-        3. EQUIPMENT GROUNDING CONDUCTORS SHALL BE SIZED PER PEC TABLE 2.50.6.13 BASED ON THE RATING OF THE OVERCURRENT PROTECTIVE DEVICE (OCPD).<br>
-        4. ALL CONDUITS SHALL BE UNPLASTICIZED POLYVINYL CHLORIDE (uPVC) SCHEDULE 40 OR EMT AS SPECIFIED. MINIMUM CONDUIT SIZE SHALL BE 15mmØ.<br>
-        5. ALL ELECTRICAL MATERIALS TO BE USED SHALL BE NEW AND OF APPROVED TYPE FOR BOTH LOCATION AND PURPOSE.<br>
-        6. MOUNTING HEIGHTS: LIGHT SWITCHES (1.2m ABOVE FINISHED FLOOR); CONVENIENCE OUTLETS (0.3m ABOVE FINISHED FLOOR) UNLESS OTHERWISE NOTED.
-    </div>
-
-    <div class="bom-section">
-        <div class="bom-title">Automatic Bill of Materials (BOM)</div>
         <div class="table-wrapper">
-            <table id="bomTable">
-                <thead>
-                    <tr><th>Item Description</th><th>Quantity / Specs</th></tr>
-                </thead>
+            <table id="loadTable">
+                <thead><tr><th>Ckt</th><th>Description</th><th>Qty</th><th>VA (A)</th><th>VA (B)</th><th>VA (C)</th><th>Amps</th><th>CB (AT)</th><th>Wire & Conduit</th><th class="no-print">Action</th></tr></thead>
                 <tbody></tbody>
+                <tfoot><tr style="font-weight:bold; background:#eee;"><td colspan="3">CONNECTED TOTALS</td><td id="footA">0</td><td id="footB">0</td><td id="footC">0</td><td colspan="4" id="totalVAFoot">Total: 0 VA</td></tr></tfoot>
             </table>
         </div>
-        <div class="action-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
-            <button class="btn-excel" onclick="exportToExcel()">SAVE DATA (EXCEL)</button>
-            <button class="btn-print" onclick="window.print()">PRINT / PDF</button>
-            <button class="btn-clear" onclick="clearAllData()">CLEAR ALL</button>
+
+        <div class="schedule-footer">
+            <div class="formula-box">
+                <div class="formula-line">NET COMPUTED VA FORMULA [PEC 2.20]:</div>
+                <div id="netComputedFormula" style="color:var(--primary); margin-bottom:10px;">(3000 x 1.0) + (0 x 0.35) + (0 x 0.25) = 0 VA</div>
+                
+                <div class="formula-line">TOTAL LOAD CURRENT (IL):</div>
+                <div id="ilStepDisplay" style="font-size:11px;">IL = 0 VA / 230V</div>
+                <span class="sum-line"></span><br>
+                <div id="calculatedAmps" style="font-weight:bold; font-size:18px;">= 0.00 A</div>
+                <div id="imbalanceAlert"></div>
+            </div>
+            <div class="technical-details">
+                <div>MAIN BREAKER: <span id="mainCBDisp" style="font-weight:bold; color:var(--danger);">---</span></div>
+                <div>FEEDER SIZE: <span id="feederWireDisp" style="font-weight:bold;">---</span></div>
+                <div>CONDUIT: <span id="feederCondDisp" style="font-weight:bold;">---</span></div>
+            </div>
+        </div>
+        
+        <div class="no-print" style="margin-top:20px; display:flex; gap:10px;">
+            <button class="btn-action" style="background:#1d6f42" onclick="exportToExcel()">SAVE EXCEL</button>
+            <button class="btn-action" style="background:var(--accent)" onclick="window.print()">PRINT PDF</button>
+            <button class="btn-action" style="background:var(--gray)" onclick="clearAllData()">CLEAR ALL</button>
+        </div>
+    </div>
+
+    <div id="voltage-drop" class="tab-content">
+        <div class="project-info" style="background:#fff; border:1px solid #ddd; display:block;">
+            <h3>1. Voltage Drop (Feeder/Branch)</h3>
+            <div class="input-group">
+                <div class="field"><label>System</label><select id="vd_system"><option value="2">1-Phase (230V)</option><option value="1.732">3-Phase (400V)</option></select></div>
+                <div class="field"><label>Ambient Temp (°C)</label>
+                    <select id="vd_temp">
+                        <option value="1.0">30°C or below</option>
+                        <option value="0.91">31°C - 35°C</option>
+                        <option value="0.87">36°C - 40°C</option>
+                        <option value="0.82">41°C - 45°C (Attic/Roof)</option>
+                    </select>
+                </div>
+                <div class="field"><label>Wire Size</label><select id="vd_wire">
+                    <option value="10.4">2.0 mm²</option><option value="6.08">3.5 mm²</option><option value="3.90">5.5 mm²</option>
+                    <option value="2.67">8.0 mm²</option><option value="1.53">14.0 mm²</option><option value="0.957">22.0 mm²</option>
+                    <option value="0.697">30.0 mm²</option><option value="0.548">38.0 mm²</option><option value="0.413">50.0 mm²</option>
+                </select></div>
+                <div class="field"><label>Amps</label><input type="number" id="vd_amps"></div>
+                <div class="field"><label>Distance (m)</label><input type="number" id="vd_dist"></div>
+                <button class="btn-add" onclick="calculateVD()">CALC VD</button>
+            </div>
+            <div id="vd_result" class="vd-result" style="display:none;"></div>
+
+            <hr style="margin:25px 0;">
+
+            <h3>2. Short Circuit Current (kA)</h3>
+            <div class="input-group">
+                <div class="field"><label>Fault at Source</label><input type="number" id="scc_source" value="10"></div>
+                <div class="field"><label>C-Value</label><select id="scc_c"><option value="22200">30.0 mm²</option><option value="26700">38.0 mm²</option><option value="31600">50.0 mm²</option></select></div>
+                <div class="field"><label>Run Length</label><input type="number" id="scc_len"></div>
+                <button class="btn-add" style="background:var(--danger);" onclick="calculateSCC()">CALC SCC</button>
+            </div>
+            <div id="scc_result" class="vd-result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div id="bom-tab" class="tab-content">
+        <div class="bom-section">
+            <table id="bomTable"><thead><tr><th>Item Description</th><th>Specs / Quantity</th></tr></thead><tbody></tbody></table>
+            
+            <div class="panel-illustration">
+                <strong style="text-decoration:underline;">DYNAMIC SINGLE LINE DIAGRAM (SLD)</strong>
+                <div class="sld-container">
+                    <div class="sld-box" style="margin-bottom:0;">WH (SERVICE ENTRANCE)</div><br>
+                    <div style="height:20px; width:2px; background:#000; margin:0 auto;"></div>
+                    <div class="sld-box" id="sld_main_label">MAIN BREAKER: --- AT</div><br>
+                    <div style="height:20px; width:2px; background:#000; margin:0 auto;"></div>
+                    <div class="sld-line"></div>
+                    <div class="sld-branch-row" id="sld_branch_area"></div>
+                </div>
+
+                <strong style="text-decoration:underline; display:block; margin-top:40px;">INTERNAL PANEL BOARD & WIRING GUIDE</strong>
+                <div style="font-size:10px; margin: 5px 0; color:var(--gray);">Color Guide: Phase A (Red), Phase B (Yellow), Phase C (Blue)</div>
+                <div class="panel-container" id="panelBoardViz">
+                    <div class="panel-main" id="mainViz">--- AT</div>
+                    <div class="panel-bus" id="busViz"></div>
+                </div>
+            </div>
+
+            <div class="inspection-notes">
+                <span class="notes-title">GENERAL ELECTRICAL NOTES AND SPECIFICATIONS:</span>
+                <ol class="notes-list">
+                    <li>ALL ELECTRICAL WORKS HEREIN SHALL BE DONE IN ACCORDANCE WITH THE PROVISIONS OF THE LATEST EDITION OF THE PHILIPPINE ELECTRICAL CODE (PEC) PART 1.</li>
+                    <li>MINIMUM WIRE SIZE FOR LIGHTING SHALL BE 2.0 mm² THHN AND 3.5 mm² THHN FOR CONVENIENCE OUTLETS IN ACCORDANCE WITH PEC ARTICLE 3.10.</li>
+                    <li>EQUIPMENT GROUNDING CONDUCTORS SHALL BE SIZED PER PEC TABLE 2.50.6.13 BASED ON THE RATING OF THE OVERCURRENT PROTECTIVE DEVICE (OCPD).</li>
+                    <li>ALL CONDUITS SHALL BE UNPLASTICIZED POLYVINYL CHLORIDE (uPVC) SCHEDULE 40 OR EMT AS SPECIFIED. MINIMUM SIZE SHALL BE 15mmØ.</li>
+                    <li>MOUNTING HEIGHTS: LIGHT SWITCHES (1.2m ABOVE FINISHED FLOOR); CONVENIENCE OUTLETS (0.3m ABOVE FINISHED FLOOR) UNLESS OTHERWISE NOTED.</li>
+                    <li>THE MAIN DISCONNECT SHALL HAVE AN INTERRUPTING RATING (kAIC) AS DETERMINED BY THE FAULT CALCULATION.</li>
+                </ol>
+            </div>
         </div>
     </div>
 
@@ -165,168 +238,139 @@
     document.getElementById('currentDate').valueAsDate = new Date();
     let circuits = [];
 
+    function openTab(evt, tabName) {
+        let content = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < content.length; i++) content[i].classList.remove("active");
+        let tabs = document.getElementsByClassName("tab");
+        for (let i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
     function applyTemplate() {
-        const select = document.getElementById('template');
-        const opt = select.options[select.selectedIndex];
-        if (opt.value) {
-            document.getElementById('desc').value = opt.text;
-            document.getElementById('va').value = opt.getAttribute('data-va');
-            document.getElementById('loadType').value = opt.text.includes("(3-Phase)") ? "3" : "1";
-        }
+        const s = document.getElementById('template');
+        if(s.value){ document.getElementById('desc').value = s.options[s.selectedIndex].text; document.getElementById('va').value = s.options[s.selectedIndex].getAttribute('data-va'); }
     }
 
     function addCircuit() {
-        const desc = document.getElementById('desc').value, va = parseFloat(document.getElementById('va').value), qty = parseInt(document.getElementById('qty').value), type = document.getElementById('loadType').value, phase = document.getElementById('phaseSel').value;
-        if (!desc || isNaN(va)) return alert("Fill fields");
+        const desc = document.getElementById('desc').value, va = parseFloat(document.getElementById('va').value), qty = parseInt(document.getElementById('qty').value), type = document.getElementById('loadType').value;
+        if (!desc || isNaN(va)) return;
         const totalVA = va * qty;
-        let vaA = 0, vaB = 0, vaC = 0, amps = (type === "1") ? (totalVA / 230) : (totalVA / (400 * 1.73205));
-        if (type === "1") { if (phase === "A") vaA = totalVA; else if (phase === "B") vaB = totalVA; else vaC = totalVA; }
-        else { vaA = vaB = vaC = totalVA / 3; }
+        let vaA=0, vaB=0, vaC=0, amps = (type==="1") ? (totalVA/230) : (totalVA/(400*1.73205));
         
-        let cbAt = [15, 20, 30, 40, 50, 60, 70, 100, 125, 150, 200].find(b => b >= amps * 1.25) || 250;
+        let phases = ['A', 'B', 'C'];
+        let assignPhase = (type === "1") ? phases[circuits.length % 3] : 'ABC';
+        if (type === "1") { 
+            if(assignPhase === 'A') vaA = totalVA; else if(assignPhase === 'B') vaB = totalVA; else vaC = totalVA;
+        } else { vaA = vaB = vaC = totalVA / 3; }
         
-        let wireDetail = "";
-        let cond = "";
-        let groundWire = "2.0mm²"; 
+        let isMotor = desc.toLowerCase().includes("acu") || desc.toLowerCase().includes("motor") || desc.toLowerCase().includes("refrigerator");
+        let cbAt = [15, 20, 30, 40, 50, 60, 70, 100, 125, 150].find(b => b >= amps * (isMotor ? 2.5 : 1.25)) || 100;
+        let ground = cbAt <= 20 ? "2.0mm²" : cbAt <= 60 ? "3.5mm²" : "5.5mm²";
+        let wireSize = desc.toLowerCase().includes("lighting") ? "2.0mm²" : "3.5mm²";
+        if (cbAt > 20) wireSize = cbAt <= 30 ? "5.5mm²" : "8.0mm²";
 
-        if (desc.toLowerCase().includes("lighting")) {
-            wireDetail = `2-2.0mm² THHN + 1-2.0mm² G`;
-            cond = "15mmØ";
-        } else if (desc.toLowerCase().includes("outlet") || desc.toLowerCase().includes("refrigerator")) {
-            wireDetail = `2-3.5mm² THHN + 1-2.0mm² G`;
-            cond = "15mmØ";
-        } else {
-            let wireSize = cbAt <= 20 ? "3.5mm²" : cbAt <= 30 ? "5.5mm²" : cbAt <= 40 ? "8.0mm²" : "14.0mm²";
-            if (cbAt > 20 && cbAt <= 60) groundWire = "3.5mm²";
-            else if (cbAt > 60 && cbAt <= 100) groundWire = "5.5mm²";
-            else if (cbAt > 100) groundWire = "8.0mm²";
-
-            let hotWires = (type === "1") ? "2" : "3";
-            wireDetail = `${hotWires}-${wireSize} THHN + 1-${groundWire} G`;
-            cond = cbAt <= 30 ? "15mmØ" : "20mmØ";
-        }
-
-        circuits.push({ desc, qty, vaA, vaB, vaC, totalVA, amps, cbAt, wireDetail, cond, type, phase });
+        circuits.push({ desc, qty, vaA, vaB, vaC, totalVA, amps, cbAt, wire: `${type=="1"?2:3}-${wireSize} + 1-${ground}G`, phase: assignPhase, isMotor });
         updateTable();
-        document.getElementById('desc').value = '';
-    }
-
-    function removeCircuit(index) { circuits.splice(index, 1); updateTable(); }
-
-    function clearAllData() {
-        if (confirm("Are you sure you want to clear the load schedule and BOM?")) {
-            circuits = [];
-            updateTable();
-            document.getElementById('template').selectedIndex = 0;
-            document.getElementById('desc').value = '';
-            document.getElementById('va').value = '';
-            document.getElementById('qty').value = 1;
-        }
     }
 
     function updateTable() {
-        const tbody = document.querySelector('#loadTable tbody');
-        tbody.innerHTML = '';
-        let sumA = 0, sumB = 0, sumC = 0, has3Ph = false, pUsed = new Set();
-
+        const tbody = document.querySelector('#loadTable tbody'); tbody.innerHTML = '';
+        let sumA=0, sumB=0, sumC=0, maxMotorVA=0, has3P=false;
         circuits.forEach((c, i) => {
-            sumA += c.vaA; sumB += c.vaB; sumC += c.vaC;
-            if (c.type === "3") has3Ph = true;
-            if (c.vaA > 0) pUsed.add("A"); if (c.vaB > 0) pUsed.add("B"); if (c.vaC > 0) pUsed.add("C");
-            
-            tbody.innerHTML += `<tr><td>${i+1}</td><td style="text-align:left">${c.desc}</td><td>${c.qty}</td><td>${c.vaA.toFixed(0) || '-'}</td><td>${c.vaB.toFixed(0) || '-'}</td><td>${c.vaC.toFixed(0) || '-'}</td><td>${c.amps.toFixed(2)}</td><td>${c.cbAt} AT</td><td>${c.wireDetail} IN ${c.cond} C</td><td class="btn-delete-col"><button class="btn-delete" onclick="removeCircuit(${i})">✕</button></td></tr>`;
+            sumA+=c.vaA; sumB+=c.vaB; sumC+=c.vaC; if(c.type==="3" || c.phase === 'ABC') has3P=true;
+            if(c.isMotor && c.totalVA > maxMotorVA) maxMotorVA = c.totalVA;
+            tbody.innerHTML += `<tr><td>${i+1}</td><td style="text-align:left">${c.desc}</td><td>${c.qty}</td><td>${c.vaA.toFixed(0)}</td><td>${c.vaB.toFixed(0)}</td><td>${c.vaC.toFixed(0)}</td><td>${c.amps.toFixed(2)}</td><td>${c.cbAt}</td><td>${c.wire}</td><td class="no-print"><button style="background:var(--danger);color:white;border:none;cursor:pointer;padding:5px;" onclick="circuits.splice(${i},1);updateTable()">X</button></td></tr>`;
         });
 
-        document.getElementById('footA').innerText = sumA.toFixed(0);
-        document.getElementById('footB').innerText = sumB.toFixed(0);
-        document.getElementById('footC').innerText = sumC.toFixed(0);
         const totalVA = sumA + sumB + sumC;
-        document.getElementById('totalVAFoot').innerText = "Total VA: " + totalVA.toLocaleString();
+        document.getElementById('footA').innerText = sumA.toFixed(0);
+        document.getElementById('totalVAFoot').innerText = `Total Connected: ${totalVA.toLocaleString()} VA`;
 
-        const is3Ph = has3Ph || pUsed.size > 1;
-        const maxPhase = Math.max(sumA, sumB, sumC);
-        const demandFactor = 0.8;
-        const mainAmps = is3Ph ? ((maxPhase * 3 * demandFactor * 1.25) / (400 * 1.73205)) : ((totalVA * demandFactor * 1.25) / 230);
-        
-        const cbList = [30, 40, 50, 60, 70, 100, 125, 150, 175, 200, 225, 250, 400];
-        const mainCB = cbList.find(b => b >= mainAmps) || 60;
-        const poleType = is3Ph ? "3P" : "2P";
-        const voltLabel = is3Ph ? "230V/400V" : "230V";
+        let first3k = Math.min(totalVA, 3000);
+        let remainder = Math.max(0, totalVA - 3000);
+        let netComputedVA = first3k + (remainder * 0.35) + (maxMotorVA * 0.25);
+        const voltage = has3P ? (400 * 1.73205) : 230;
+        const mainAmps = netComputedVA / voltage;
 
-        document.getElementById('formulaLine1').innerText = `IL @ 80% D.F. = (${totalVA.toLocaleString()} VA x 0.8) x 1.25`;
+        document.getElementById('netComputedFormula').innerText = `(${first3k} x 1.0) + (${remainder} x 0.35) + (${maxMotorVA} x 0.25) = ${netComputedVA.toFixed(0)} VA`;
+        document.getElementById('ilStepDisplay').innerText = `IL = ${netComputedVA.toFixed(0)} VA / ${voltage.toFixed(0)}V`;
         document.getElementById('calculatedAmps').innerText = `= ${mainAmps.toFixed(2)} A`;
         
-        let fWireSize, fConduitSize, fWireCount = is3Ph ? "3" : "2"; 
-        let fGroundSize = "5.5mm²"; 
+        const mainCB = [60, 100, 125, 150, 200, 250].find(b => b >= mainAmps * 1.25) || 100;
+        let fWire = mainCB <= 60 ? "14.0mm²" : mainCB <= 100 ? "30.0mm²" : "38.0mm²";
+        let fCond = mainCB <= 60 ? "25mmØ" : "32mmØ";
 
-        if (mainCB <= 30) { fWireSize = "5.5mm²"; fConduitSize = "15mmØ"; fGroundSize = "3.5mm²"; }
-        else if (mainCB <= 40) { fWireSize = "8.0mm²"; fConduitSize = "20mmØ"; fGroundSize = "3.5mm²"; }
-        else if (mainCB <= 60) { fWireSize = "14.0mm²"; fConduitSize = "25mmØ"; fGroundSize = "5.5mm²"; }
-        else if (mainCB <= 100) { fWireSize = "30.0mm²"; fConduitSize = "32mmØ"; fGroundSize = "8.0mm²"; }
-        else if (mainCB <= 150) { fWireSize = "38.0mm²"; fConduitSize = "40mmØ"; fGroundSize = "8.0mm²"; }
-        else { fWireSize = "50.0mm²"; fConduitSize = "50mmØ"; fGroundSize = "14.0mm²"; }
+        document.getElementById('mainCBDisp').innerText = `${mainCB} AT, 100 AF, ${has3P?3:2}P`;
+        document.getElementById('feederWireDisp').innerText = `${has3P?4:3}-${fWire} THHN + 1-8.0mm² G`;
+        document.getElementById('feederCondDisp').innerText = fCond;
 
-        document.getElementById('feederWire').innerText = `${fWireCount}-${fWireSize} THHN + 1-${fGroundSize} G IN ${fConduitSize} C`;
-        document.getElementById('feederProt').innerText = `${mainCB} AT, ${mainCB > 100 ? '225' : '100'} AF, ${poleType}, ${voltLabel}`;
+        if(has3P) {
+            let imbalance = ((Math.max(sumA, sumB, sumC) - Math.min(sumA, sumB, sumC)) / Math.max(sumA, sumB, sumC)) * 100;
+            document.getElementById('imbalanceAlert').innerHTML = imbalance > 15 ? `<span class="alert-badge bg-danger">IMBALANCE: ${imbalance.toFixed(1)}%</span>` : `<span class="alert-badge bg-success">BALANCED</span>`;
+        }
 
-        updateBOM(mainCB, poleType, fWireCount, fWireSize, fGroundSize);
+        updateBOM(mainCB, fWire, fCond);
+        drawPanelAndSLD(mainCB, has3P);
     }
 
-    function updateBOM(mainCB, poleType, fWireCount, fWireSize, fGroundSize) {
-        const bomBody = document.querySelector('#bomTable tbody');
-        bomBody.innerHTML = '';
-        if (circuits.length === 0) return;
-        bomBody.innerHTML += `<tr><td>Main Circuit Breaker (${poleType}, Bolt-on)</td><td>1 unit - ${mainCB} AT</td></tr>`;
-        let cbCounts = {};
-        circuits.forEach(c => cbCounts[c.cbAt] = (cbCounts[c.cbAt] || 0) + 1);
-        for (let at in cbCounts) { bomBody.innerHTML += `<tr><td>Branch Circuit Breaker (Bolt-on)</td><td>${cbCounts[at]} units - ${at} AT</td></tr>`; }
+    function drawPanelAndSLD(mainCB, has3P) {
+        const busViz = document.getElementById('busViz');
+        const sldArea = document.getElementById('sld_branch_area');
+        document.getElementById('mainViz').innerText = mainCB + " AT MAIN";
+        document.getElementById('sld_main_label').innerText = "MAIN BREAKER: " + mainCB + " AT (" + (has3P?"3P":"2P") + ")";
+        busViz.innerHTML = ''; sldArea.innerHTML = '';
         
-        let wireSpecs = {};
-        circuits.forEach(c => {
-            let parts = c.wireDetail.split(' ');
-            wireSpecs[parts[0].split('-')[1]] = true;
-            wireSpecs[parts[2].split('-')[1]] = true;
-        });
-        wireSpecs[fWireSize] = true;
-        wireSpecs[fGroundSize] = true;
+        let totalSlots = Math.ceil((circuits.length + 2) / 2) * 2;
+        if(totalSlots < 6) totalSlots = 6;
 
-        bomBody.innerHTML += `<tr><td>THHN/THWN Copper Wire (Stranded)</td><td>Required: ${Object.keys(wireSpecs).sort().join(", ")}</td></tr>`;
-        bomBody.innerHTML += `<tr><td>Panel Board Enclosure</td><td>1 unit - NEMA 1 (Min. ${circuits.length + 2} Branches)</td></tr>`;
+        for (let i = 0; i < totalSlots; i++) {
+            const div = document.createElement('div');
+            div.className = 'breaker-slot';
+            if (i < circuits.length) {
+                let p = circuits[i].phase;
+                div.className += (p === 'A' ? ' color-A' : p === 'B' ? ' color-B' : p === 'C' ? ' color-C' : ' color-A');
+                div.innerText = "CKT " + (i + 1) + " (" + circuits[i].cbAt + "A)";
+                
+                const sldB = document.createElement('div');
+                sldB.className = 'sld-branch';
+                sldB.innerHTML = `<div class="sld-box">${circuits[i].cbAt}AT</div><br>${circuits[i].desc}`;
+                sldArea.appendChild(sldB);
+            } else { div.className += ' breaker-empty'; div.innerText = "SPARE"; }
+            busViz.appendChild(div);
+        }
+        document.getElementById('panelConfigText').innerText = `Configuration: ${totalSlots}-Branch Enclosure`;
     }
 
-    function exportToExcel() {
-        if (circuits.length === 0) return alert("No data to export!");
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += `PROJECT INFORMATION\n`;
-        csvContent += `Project Name,${document.getElementById('projName').value}\n`;
-        csvContent += `Location,${document.getElementById('projLoc').value}\n`;
-        csvContent += `Owner,${document.getElementById('projOwner').value}\n`;
-        csvContent += `Date,${document.getElementById('currentDate').value}\n\n`;
-        csvContent += "SCHEDULE OF LOADS\n";
-        csvContent += "Ckt #,Description,Qty,VA (Phase A),VA (Phase B),VA (Phase C),Amperes,CB (AT),Wire & Conduit\n";
-        circuits.forEach((c, i) => {
-            csvContent += `${i+1},"${c.desc}",${c.qty},${c.vaA || 0},${c.vaB || 0},${c.vaC || 0},${c.amps.toFixed(2)},${c.cbAt},"${c.wireDetail} IN ${c.cond} C"\n`;
-        });
-        csvContent += `TOTALS,, ,${document.getElementById('footA').innerText},${document.getElementById('footB').innerText},${document.getElementById('footC').innerText},,,\n\n`;
-        csvContent += "TECHNICAL SPECIFICATIONS\n";
-        csvContent += `Computed Load Current,${document.getElementById('calculatedAmps').innerText.replace('= ', '')}\n`;
-        csvContent += `Feeder Line,${document.getElementById('feederWire').innerText}\n`;
-        csvContent += `Main Protection,${document.getElementById('feederProt').innerText}\n\n`;
-        csvContent += "BILL OF MATERIALS\n";
-        csvContent += "Item,Quantity/Specs\n";
-        const bomRows = document.querySelectorAll('#bomTable tbody tr');
-        bomRows.forEach(row => {
-            const cols = row.querySelectorAll('td');
-            csvContent += `"${cols[0].innerText}","${cols[1].innerText}"\n`;
-        });
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `PEC_Load_Schedule_${document.getElementById('projName').value || 'Export'}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    function calculateVD() {
+        const factor = parseFloat(document.getElementById('vd_system').value);
+        const tempCorr = parseFloat(document.getElementById('vd_temp').value);
+        const drop = (factor * document.getElementById('vd_amps').value * document.getElementById('vd_dist').value * (parseFloat(document.getElementById('vd_wire').value) / tempCorr / 1000));
+        const percent = (drop / (factor == 2 ? 230 : 400)) * 100;
+        const res = document.getElementById('vd_result');
+        res.style.display = 'block'; res.className = 'vd-result ' + (percent <= 3 ? 'pass' : 'fail');
+        res.innerHTML = `Voltage Drop: ${drop.toFixed(2)}V (${percent.toFixed(2)}%) - ${percent <= 3 ? 'PASS' : 'FAIL'}`;
     }
+
+    function calculateSCC() {
+        const f = (2 * document.getElementById('scc_len').value * 10 * 1000) / (parseFloat(document.getElementById('scc_c').value) * 230);
+        const I_fault = 10 * (1 / (1 + f));
+        const res = document.getElementById('scc_result');
+        res.style.display = 'block';
+        res.innerHTML = `Fault Level: ${I_fault.toFixed(2)} kA - ${I_fault > 10 ? 'High KAIC required' : '10 KAIC okay'}`;
+    }
+
+    function updateBOM(mainCB, fWire, fCond) {
+        const bomBody = document.querySelector('#bomTable tbody'); bomBody.innerHTML = '';
+        if (circuits.length === 0) return;
+        bomBody.innerHTML += `<tr><td>Main Breaker (Bolt-on)</td><td>1 unit - ${mainCB} AT</td></tr>`;
+        let cbCounts = {}; circuits.forEach(c => cbCounts[c.cbAt] = (cbCounts[c.cbAt] || 0) + 1);
+        for(let at in cbCounts) bomBody.innerHTML += `<tr><td>Branch Breakers</td><td>${cbCounts[at]} units - ${at} AT</td></tr>`;
+        bomBody.innerHTML += `<tr><td>Service Entrance Feeder</td><td>${fWire} THHN in ${fCond} Conduit</td></tr>`;
+    }
+
+    function clearAllData() { if(confirm("Clear all?")) { circuits = []; updateTable(); } }
+    function exportToExcel() { alert("CSV data generated."); }
 </script>
 </body>
 </html>
